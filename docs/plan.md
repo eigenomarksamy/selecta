@@ -221,6 +221,23 @@ shared by `quality` and `rekordbox`. Do F5 first. Each ticket's check is its
   library.
 - **Needs:** nothing. **After:** F5.
 
+<a id="f7"></a>
+### F7 · The ffmpeg tool still carries the old prefix
+
+- **Where:** `wasm/sdm_ffmpeg.c`, `wasm/build.sh`, `wasm/prebuilt/`,
+  `build_browser.py`'s `TOOL_FILES` and `TOOL_SOURCES`,
+  `frontend/src/browser/tools.ts`, and the README's and `CLAUDE.md`'s lines on
+  the audio tools.
+- **Change:** rename the tool to `selecta_ffmpeg`: its source, its error
+  messages and the files it builds. Rename `build.sh`'s cache folder to
+  `selecta-ffmpeg-wasm`, and point its comment at `selecta.core.tools`. Rebuild
+  `wasm/prebuilt/` with `wsl bash wasm/build.sh`, since `stamp.json` hashes the
+  sources.
+- **Done when:** `git grep -i sdm` finds only this plan, `build_browser.py`
+  accepts the new stamp, and `quality` in the browser build gives the same
+  output as before the rename on the same files.
+- **Needs:** nothing, though the rebuild needs Linux or WSL. **After:** F5.
+
 ### Deferred on purpose
 
 Two items are deferred on purpose. They are not tickets.
@@ -602,7 +619,7 @@ foundations are drawn thicker.
 flowchart LR
   subgraph writers["the writers"]
     direction LR
-    P1["Phase 1 · known debt<br/>F5, F6"] -->|"baselines after fixes"| P2["Phase 2 · harness<br/>H1"]
+    P1["Phase 1 · known debt<br/>F5–F7"] -->|"baselines after fixes"| P2["Phase 2 · harness<br/>H1"]
     P2 -->|"fixtures for writers"| P4["Phase 4 · library manager<br/>L1–L5"]
     P2 --> P7["Phase 7 · Traktor, Serato<br/>X1, X2"]
     P4 -.->|"playlists, if built"| P7
@@ -697,6 +714,9 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-18 · plan** · F7 added, at the owner's request: the ffmpeg tool,
+  its build's cache folder and a comment still carry the old prefix, and
+  renaming them means rebuilding `wasm/prebuilt/`.
 - **2026-11-18 · plan** · This plan starts in this repository with its open
   tickets, each keeping its id, anchor and issue, the decisions D1–D4 as they
   were made, and the entries below that the open tickets need. The state root's
