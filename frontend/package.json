@@ -1,0 +1,27 @@
+{
+  "name": "selecta-web",
+  "private": true,
+  "version": "0.2.0",
+  "description": "The page `selecta web` serves. Built into src/selecta/web/static/.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:browser": "vite --mode browser",
+    "build": "tsc --noEmit && vite build",
+    "build:browser": "tsc --noEmit && vite build --mode browser",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "pyodide": "314.0.7",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

@@ -1,0 +1,21 @@
+*.mp3
+*.log
+.venv
+*.pyc
+__pycache__/
+.vscode/
+tmp/
+out/
+*.csv
+*.txt
+
+# packaging
+*.egg-info/
+build/
+dist/
+
+# selecta web: the page is built from frontend/ (npm run build), never committed
+frontend/node_modules/
+src/selecta/web/static/
+# wrangler dev / deploy state
+.wrangler/

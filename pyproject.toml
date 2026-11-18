@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "selecta"
+version = "0.2.0"
+description = "Music library toolchain: catalog local files, reconcile with Rekordbox, measure audio quality."
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+dependencies = [
+    "eyed3",
+    "mutagen>=1.45.0",
+]
+
+# Heavy or platform-specific dependencies stay optional. Each feature imports
+# them inside its command handler, so `selecta --help` and unrelated subcommands
+# work without them installed.
+[project.optional-dependencies]
+rekordbox = [
+    "pyrekordbox>=0.4.0",
+    # Decrypts master.db where sqlcipher3 is missing (core/sqlcipher.py) - the
+    # browser build always, and any platform sqlcipher3 has no wheel for.
+    "pycryptodome>=3.19",
+]
+# `selecta analyze` uses pyrekordbox for its ANLZ structs only - it never opens a
+# database - but the package is the same one, so the extra is an alias rather
+# than a second entry.
+analyze = [
+    "pyrekordbox>=0.4.0",
+]
+# `selecta quality` measures the decoded audio with numpy (clipping, the spectrum
+# behind transcode detection, bit depth); ffmpeg does the decoding and the
+# loudness. Its Rekordbox columns also need pyrekordbox - `.[rekordbox]` - and
+# are left blank without it.
+quality = [
+    "numpy",
+]
+all = [
+    "selecta[rekordbox,analyze,quality]",
+]
+
+# Not every dependency is a Python package. Fingerprinting (`selecta duplicates`,
+# and `selecta rekordbox` without --duplicates-by-name) shells out to `fpcalc` from
+# Chromaprint, and `selecta quality` to `ffprobe`/`ffmpeg`. Both are binaries that
+# have to be on PATH; pip cannot install them, so they are documented here
+# rather than declared above. The two fingerprinting commands borrow a
+# temporary fpcalc for the run when none is installed.
+#
+#   fpcalc   https://github.com/acoustid/chromaprint/releases
+#   ffmpeg   https://ffmpeg.org/download.html
+#
+# `selecta web` needs no extra: its server is stdlib only. The page it serves is a
+# React app built with Node from frontend/ into src/selecta/web/static/, which is
+# gitignored - run `npm install` and `npm run build` in frontend/ once, and again
+# after changing it. Without the build the server still runs and says so.
+#
+#   node     https://nodejs.org/   (build time only, not at run time)
+
+[project.scripts]
+selecta = "selecta.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# The built page, so a non-editable install carries it. Absent if never built.
+[tool.setuptools.package-data]
+"selecta.web" = ["static/*", "static/**/*"]
