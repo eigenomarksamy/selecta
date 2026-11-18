@@ -133,6 +133,9 @@ ticket in this phase needs another.
 - **Done when:** both commands read a real playlist with a real client ID from
   each of the three front ends, and an account that is not on the app's user
   list gets the `/me` 403 message. Otherwise, the README records the limit.
+- **Before the check:** the Spotify app lists `https://selecta.eigenomar.com/`
+  among its redirect URIs. The browser build sends its own origin, so a login
+  from the live site fails until it is registered.
 - **Needs:** nothing.
 
 <a id="v3"></a>
