@@ -61,7 +61,7 @@ body {
   /* The page's own text is lowercase: labels, headings, and the argparse help
      the forms are built from. A rule rather than lowercased strings, because
      most of what shows comes from the server. What the page shows from a
-     source is exempt: see .as-is below. */
+     source is exempt, and so are errors and progress: see below. */
   text-transform: lowercase;
 }
 /* The browser's own stylesheet gives form controls text-transform: none, so
@@ -77,6 +77,13 @@ select,
    report names; paths; a run's command line and its log; a report table's
    cells. A track called "DNA" is not "dna". */
 .as-is {
+  text-transform: none;
+}
+/* Errors and progress are shown as written too: an error often names a path or
+   a track, and a progress line is a command's own output, like the log. */
+.error-text,
+.error-box,
+.progress {
   text-transform: none;
 }
 
