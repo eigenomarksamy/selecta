@@ -77,13 +77,14 @@ still open in each command:
 | `analyze` | done | Cue points and waveforms are skipped on purpose | — |
 | `quality` | done | The Rekordbox columns are blank for a USB without the local library behind it, because `export.pdb` is unread | [F6](#f6) |
 | `playlist-diff` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
-| `playlist-export` | partial | Never run against the real Spotify API with a real client ID | [V1](#v1) |
+| `playlist-export` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 
 Of the front ends, `selecta web` is done. Its one planned item, a timeline view
 of `analyze`'s phrases, is deferred ([Phase 1](#deferred-on-purpose)). The
-browser build runs every command and deploys to selecta.eigenomar.com. No
-command run on the live site has been checked yet ([V1](#v1)), and the build has
-never been tested in Firefox or Safari ([V3](#v3)).
+browser build runs every command and deploys to selecta.eigenomar.com. The
+playlist commands were checked there with a real Spotify login on 2026-11-19
+([V1](#v1)), and the build has never been tested in Firefox or Safari
+([V3](#v3)).
 
 The five planned features are the library manager, Serato/Traktor export,
 rbxport integration, genre enrichment and `selecta dig`. They are designed in
@@ -114,8 +115,8 @@ exception is a task to redesign.
 
 ## Phase 0 — Close the verification gaps
 
-The priority is the check no simulation can stand in for: a real Spotify login
-([V1](#v1)). A real Cloudflare deploy of the browser build was checked on
+The check no simulation could stand in for, a real Spotify login
+([V1](#v1)), passed on 2026-11-19. A real Cloudflare deploy of the browser build was checked on
 2026-11-09 ([log](#log)). Beyond that, both front ends were tested only against
 fakes: a simulated Spotify API, `wrangler dev`, and headless Edge driven through
 CDP. This phase needs no new code unless a check fails.
@@ -125,7 +126,7 @@ into the README as a known limit. The phase is done when all of them are. No
 ticket in this phase needs another.
 
 <a id="v1"></a>
-### V1 · Real Spotify login with a real client ID
+### V1 · Real Spotify login with a real client ID · *done*
 
 - **Check:** run `playlist-export` and `playlist-diff` from the CLI, from
   `selecta web` and from the browser build. This includes the `/me` 403 for an
@@ -138,6 +139,10 @@ ticket in this phase needs another.
   from the live site fails until it is registered. Done on 2026-11-19
   ([log](#log)).
 - **Needs:** nothing.
+- **Result:** both commands read a real playlist with a real client ID from
+  the CLI, `selecta web` and the live site, and an account not on the app's
+  user list got the `/me` 403 message. Nothing failed, so the README records
+  no new limit ([log](#log)).
 
 <a id="v3"></a>
 ### V3 · Firefox and Safari
@@ -299,7 +304,8 @@ already: the CLI and `selecta web` log in on every run, and `dig` and enrichment
 cannot work without an HTTP cache. Neither `out/` nor `tmp/` can hold this
 state, because `out/` holds reports and `tmp/` is deleted on exit.
 
-This phase needs the real Spotify login checked first ([V1](#v1)).
+This phase needs the real Spotify login checked first ([V1](#v1)), done on
+2026-11-19.
 
 <a id="s1"></a>
 ### S1 · The state root, with the saved Spotify login
@@ -721,6 +727,11 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-19 · V1** · Done, checked by hand by the owner with their own
+  Spotify app and client ID: `playlist-export` and `playlist-diff` each read a
+  real playlist from the CLI, from `selecta web` and from the browser build at
+  selecta.eigenomar.com, and an account that is not on the app's user list got
+  the `/me` 403 message. Nothing failed. S1, which needed V1, can start.
 - **2026-11-19 · F7** · Done: the ffmpeg tool is `selecta_ffmpeg`, in
   `wasm/selecta_ffmpeg.c`, its error messages, `build.sh`, `build_browser.py`'s
   `TOOL_FILES` and `TOOL_SOURCES`, `tools.ts`'s `TOOL_FILES`, and the README's

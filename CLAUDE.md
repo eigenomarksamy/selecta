@@ -679,8 +679,10 @@ removed (null `item`) are skipped and counted; local files are written with thei
 **Verified** against a simulated API only (`_get` and `login` patched, the real
 `fetch_playlist` paginating two pages): every column, quotes and accents, the
 BOM, local files, skipped counts, `--output-csv` both forms, the 403 message, and
-the round trip into `playlist-diff`. No real Spotify call has been made with a
-real client ID (plan, V1).
+the round trip into `playlist-diff`. With a real client ID, checked by hand on
+2026-11-19: it and `playlist-diff` read a real playlist from the CLI, `selecta
+web` and the browser build, and an account not on the app's user list got the
+403 message (plan, V1).
 
 ### `selecta web`
 
@@ -758,8 +760,8 @@ outputs), a cancel of a real `duplicates` run mid-fingerprint with a borrowed
 fpcalc (0.3 s, `tmp/` empty after), `shutdown()` with a job running, the Vite
 proxy, and headless Edge via `puppeteer-core` for every view in light, dark and
 phone width, with zero console errors. The full 3,664-row `quality` report loads
-in 170 ms. Not verified: a Spotify login driven from the UI with a real client ID
-(plan, V1).
+in 170 ms. A Spotify login driven from the UI with a real client ID was checked
+by hand on 2026-11-19 (plan, V1).
 
 ### the browser build
 
@@ -976,7 +978,8 @@ with a real ID stopping at Spotify's login page; light, dark and phone width wit
 no horizontal scroll; zero console errors. When driving it, pass
 `--memory-pressure-off` (with little memory free the back/forward cache is
 evicted), and poll from Node, because `waitForSelector` never returns under this
-page's CSP. **Not verified:** a real Spotify login (V1), Firefox and Safari (V3),
+page's CSP. A real Spotify login from the live site was checked by hand on
+2026-11-19 (V1). **Not verified:** Firefox and Safari (V3),
 `showDirectoryPicker` on a real folder, a drive root and the real `master.db`
 file dialog (V4), a library-scale `rekordbox` fingerprint run and a multi-hour
 `quality` file in a tab (V5), and three cancel paths no test could time (V7).
