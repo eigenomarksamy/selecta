@@ -25,7 +25,7 @@ def add_parser(subparsers, parents=()) -> argparse.ArgumentParser:
         description="Parse the Rekordbox analysis files on a Pioneer USB and "
                     "report each track's beat grid and phrase structure "
                     "(intro, verse, chorus, outro) to CSV and JSON. Needs no "
-                    "Rekordbox install and no database — the USB carries it. "
+                    "Rekordbox install and no database: the USB carries it. "
                     "Read-only: nothing on the USB is written.",
     )
     p.add_argument("usb_path",

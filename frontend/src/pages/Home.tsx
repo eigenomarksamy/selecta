@@ -30,7 +30,7 @@ export function Home({ commands, jobs, session }: { commands: Command[]; jobs: J
                       <code>{name}</code>
                     </span>
                   ))}
-                  {" "}— run with selecta on your own machine.{" "}
+                  . Run them with selecta on your own machine.{" "}
                 </>
               )}
               {!browser.offline().includes("quality") && (

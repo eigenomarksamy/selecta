@@ -116,13 +116,13 @@ export function PlaylistDiffView({
 
       {tab === "maybe" && rows.length > 0 && (
         <p className="muted">
-          Not counted as owned: the folder has something close — a different version, or a file with no artist tag to
+          Not counted as owned: the folder has something close: a different version, or a file with no artist tag to
           confirm. Play the local file to decide.
         </p>
       )}
       {tab === "mismatch" && rows.length > 0 && (
         <p className="muted">
-          Not counted as owned: a file in the folder carries the track's name but is not the track — far longer or
+          Not counted as owned: a file in the folder carries the track's name but is not the track: far longer or
           shorter than Spotify's, cut off, or unreadable. Replace it.
         </p>
       )}

@@ -104,7 +104,7 @@ export function SpotifySetup({ session, section }: { session: Session; section: 
           <li>
             <strong>Redirect URIs</strong>: enter this address and click <strong>Add</strong>.
             <CopyLine text={redirect} />
-            It must match character for character — {exactly} It is where Spotify sends you back after you log in, and Spotify sends nowhere it has not been told.
+            It must match character for character: {exactly} It is where Spotify sends you back after you log in, and Spotify sends nowhere it has not been told.
             {onLocalhost && (
               <p className="help warn">
                 This page is open at <code>localhost</code>, which Spotify refuses. Open it at{" "}
@@ -168,7 +168,7 @@ export function SpotifySetup({ session, section }: { session: Session; section: 
         ) : (
           <ol className="steps">
             <li>
-              Give selecta the client ID. Either once, for every run — in a terminal:
+              Give selecta the client ID. Either once, for every run, in a terminal:
               <CopyLine text={SETX} />
               then start <code>selecta web</code> again from a new terminal, since <code>setx</code> reaches only new ones.
               Or paste it into <code>--client-id</code> on the form each time.
@@ -196,8 +196,8 @@ export function SpotifySetup({ session, section }: { session: Session; section: 
         <h2>Which playlists it can read</h2>
         <p>
           Only playlists you <strong>own or collaborate on</strong>. That is Spotify&apos;s rule for every app since
-          February 2026, not selecta&apos;s. For anyone else&apos;s playlist — a friend&apos;s, a label&apos;s, an editorial
-          one:
+          February 2026, not selecta&apos;s. For anyone else&apos;s playlist (a friend&apos;s, a label&apos;s, an editorial
+          one):
         </p>
         <ul>
           <li>

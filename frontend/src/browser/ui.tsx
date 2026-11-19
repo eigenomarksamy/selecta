@@ -80,7 +80,7 @@ export function SpotifyLogin({ browser }: { browser: BrowserHooks }) {
             </div>
             <p className="help">
               Kept in this browser until you log out. Read-only: selecta can read your playlists, not change them, and only
-              playlists you own or collaborate on — {guide("playlists", "Spotify's rule")}.
+              playlists you own or collaborate on ({guide("playlists", "Spotify's rule")}).
             </p>
           </>
         ) : (
@@ -229,7 +229,7 @@ export function PathPickRow({
     status = (
       <p className="help">
         {browser.canViewFolders
-          ? "Your browser will ask to let this page view the folder's files. They are read here, in this tab — nothing is uploaded. A large folder takes a few seconds to read."
+          ? "Your browser will ask to let this page view the folder's files. They are read here, in this tab, and nothing is uploaded. A large folder takes a few seconds to read."
           : "Your browser may call this an upload. Nothing is uploaded: the files are read here, in this tab. With a large folder the browser can take several seconds to list it before anything appears."}
       </p>
     );
@@ -238,7 +238,7 @@ export function PathPickRow({
     // file dialog takes a typed path.
     status = (
       <p className="help">
-        Rekordbox keeps its library in <code>%APPDATA%\Pioneer\rekordbox\master.db</code> — type that folder into the
+        Rekordbox keeps its library in <code>%APPDATA%\Pioneer\rekordbox\master.db</code>. Type that folder into the
         file dialog. It is read here, in this tab, and never changed or uploaded.
       </p>
     );

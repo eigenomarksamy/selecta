@@ -63,7 +63,7 @@ export function DuplicatesView({ path }: { path: string }) {
 
   if (error) return <ErrorBox error={error} />;
   if (!groups) return <div className="muted">Loading…</div>;
-  if (groups.length === 0) return <Empty>No duplicate groups in this report. A clean library, or a run that compared nothing — check its log.</Empty>;
+  if (groups.length === 0) return <Empty>No duplicate groups in this report. A clean library, or a run that compared nothing: check its log.</Empty>;
 
   const tracks = groups.reduce((n, g) => n + g.tracks.length, 0);
   const sizes = new Map<number, number>();
@@ -91,7 +91,7 @@ export function DuplicatesView({ path }: { path: string }) {
         <div className="warn-box">
           {unconfirmed === groups.length ? "None of these groups were" : `${plural(unconfirmed, "group")} here were not`}{" "}
           confirmed by audio fingerprint. Groups from <code>--skip-fingerprint</code> are metadata candidates, chained
-          together by similar durations — use them to size a run, not as duplicates.
+          together by similar durations. Use them to size a run, not as duplicates.
         </div>
       )}
 

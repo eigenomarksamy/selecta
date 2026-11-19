@@ -112,14 +112,14 @@ export function QualityView({ path }: { path: string }) {
         {lufs.length > 0 && <Stat value={`${lufs[Math.floor(lufs.length / 2)].toFixed(1)}`} label="median LUFS" />}
         <Stat value={overs.toLocaleString()} label="true peak above 0 dBTP" />
         <Stat
-          value={withRb ? withRb.toLocaleString() : "—"}
+          value={withRb.toLocaleString()}
           label={withRb ? "matched in Rekordbox" : "no Rekordbox data"}
         />
       </div>
 
       {undecodable > 0 && (
         <div className="warn-box">
-          {plural(undecodable, "file")} could not be decoded at all — see the{" "}
+          {plural(undecodable, "file")} could not be decoded at all. See the{" "}
           <button className="link" onClick={() => (setKind("undecodable"), resetPaging())}>
             undecodable
           </button>{" "}
@@ -249,7 +249,7 @@ function QualityRow({ row: r, open, onToggle }: { row: Row; open: boolean; onTog
       <td className="file-cell" title={r.file_path}>
         <span className="file-name">
           {titled ? r.title : baseName(r.file_path)}
-          {r.artist && r.artist !== "Unknown" && <span className="muted"> — {r.artist}</span>}
+          {r.artist && r.artist !== "Unknown" && <span className="muted"> · {r.artist}</span>}
         </span>
         <span className="file-sub">{titled ? baseName(r.file_path) : baseName(dirName(r.file_path))}</span>
       </td>
@@ -319,7 +319,7 @@ function Claims({ items, hideSame = false }: { items: [string, string, boolean][
 
 function Issues({ row }: { row: Row }) {
   const kinds = issues(row);
-  if (!kinds.length) return <span className="muted">—</span>;
+  if (!kinds.length) return <span className="muted">none</span>;
   return (
     <span className="issue-list">
       {kinds.map((k) => (
