@@ -10,7 +10,7 @@ the Python it runs:
                                loads: runtime, standard library, numpy, packaging,
                                and what single commands load on their first run
     dist/wheels/               selecta and its pure-Python dependencies, built here
-    dist/tools/<hash>/         fpcalc, ffprobe and sdm_ffmpeg as WebAssembly, for
+    dist/tools/<hash>/         fpcalc, ffprobe and selecta_ffmpeg as WebAssembly, for
                                duplicates, rekordbox and quality - built by
                                wasm/build.sh on Linux or in WSL into
                                wasm/prebuilt/, which is committed, because
@@ -91,11 +91,11 @@ CACHE = ROOT / "build" / "pyodide-cache"
 #: output is committed: Cloudflare's build, which runs this script, has no
 #: Emscripten. File names as frontend/src/browser/tools.ts has them.
 PREBUILT_TOOLS = ROOT / "wasm" / "prebuilt"
-TOOL_FILES = ("fpcalc", "ffprobe", "sdm_ffmpeg")
+TOOL_FILES = ("fpcalc", "ffprobe", "selecta_ffmpeg")
 
 #: What wasm/build.sh builds from, hashed into its stamp.json (SOURCES there),
 #: so a change to one cannot deploy with modules built before it.
-TOOL_SOURCES = ("build.sh", "sdm_ffmpeg.c")
+TOOL_SOURCES = ("build.sh", "selecta_ffmpeg.c")
 
 
 def main() -> int:
