@@ -20,16 +20,24 @@ same command line there.
 fpcalc only reads the first `DEFAULT_LENGTH_SECONDS` of audio. That is a
 deliberate speed/accuracy trade: it is far more than enough to tell two
 recordings apart, and it keeps each fingerprint about a thousand integers long.
+
+**A path with no UTF-8 form is fingerprinted through a copy** (`_plain_named`).
+NTFS names are unvalidated UTF-16, so one can hold half a surrogate pair. The
+name reaches fpcalc intact, but fpcalc turns its wide argv into UTF-8 for
+FFmpeg, which replaces the half pair, and FFmpeg then opens a file that does not
+exist. Names in other scripts are unaffected: they have a UTF-8 form.
 """
 from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
+from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Iterator, Optional, Sequence
 
-from selecta.core import tools
+from selecta.core import paths, tools
 
 #: Environment variable naming the fpcalc binary, honoured by pyacoustid too.
 FPCALC_ENV = "FPCALC"
@@ -68,6 +76,17 @@ def compute(
     if not os.path.isfile(file_path):
         return None
 
+    try:
+        with _plain_named(file_path) as readable_path:
+            return _run_fpcalc(readable_path, fpcalc_path, length_seconds)
+    except OSError:
+        # The plain-named copy could not be made. Caught out here, so that a
+        # vanished file is not mistaken for `_run_fpcalc`'s missing binary.
+        return None
+
+
+def _run_fpcalc(file_path: str, fpcalc_path: Optional[str], length_seconds: int) -> Optional[Fingerprint]:
+    """`compute` on a path fpcalc can open."""
     cmd = [
         fpcalc_binary(fpcalc_path),
         "-raw",
@@ -105,6 +124,40 @@ def compute(
         return None
 
     return Fingerprint(duration=duration, raw=raw)
+
+
+@contextmanager
+def _plain_named(file_path: str) -> Iterator[str]:
+    """`file_path`, or a copy of it under a plain name if fpcalc would lose the name.
+
+    Only on Windows, where fpcalc converts its argument. On POSIX a name with no
+    UTF-8 form comes from `os.listdir` with its undecodable bytes escaped, and
+    `subprocess` passes the same bytes back, so fpcalc gets the real name.
+    Pyodide is POSIX, so the browser build never copies.
+
+    A copy, not a hard link: a link needs `tmp/` on the library's volume, and a
+    USB's FAT or exFAT has no hard links. The copy lives in a `paths.scratch`
+    under `tmp/` and is deleted when the block exits. It is rare: the
+    reference clone has no such name.
+    """
+    if os.name != "nt" or _has_utf8_form(file_path):
+        yield file_path
+        return
+    ext = os.path.splitext(file_path)[1]
+    # FFmpeg probes by content, but the extension is a hint worth keeping.
+    plain_ext = ext if _has_utf8_form(ext) else ""
+    with paths.scratch("fpcalc-name") as folder:
+        copy = os.path.join(folder, "track" + plain_ext)
+        shutil.copyfile(file_path, copy)
+        yield copy
+
+
+def _has_utf8_form(text: str) -> bool:
+    try:
+        text.encode("utf-8")
+    except UnicodeEncodeError:
+        return False
+    return True
 
 
 def similarity(a: Fingerprint, b: Fingerprint) -> float:

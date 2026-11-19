@@ -200,13 +200,12 @@ ticket in this phase needs another.
 
 ## Phase 1 — Known debt in what exists
 
-F5 is a small, local fix with a check that is already known. F6, an
-`export.pdb` reader, is the one sizeable piece of work: it fills the last gap
-shared by `quality` and `rekordbox`. Do F5 first. Each ticket's check is its
-*done when*.
+F5 was a small, local fix with a check that was already known, and is done. F6,
+an `export.pdb` reader, is the one sizeable piece of work: it fills the last gap
+shared by `quality` and `rekordbox`. Each ticket's check is its *done when*.
 
 <a id="f5"></a>
-### F5 · fpcalc cannot fingerprint a file whose name contains a lone surrogate
+### F5 · fpcalc cannot fingerprint a file whose name contains a lone surrogate · *done*
 
 - **Where:** `core/fingerprint.py`.
 - **Change:** find out first whether the name is lost when fpcalc converts its
@@ -215,6 +214,11 @@ shared by `quality` and `rekordbox`. Do F5 first. Each ticket's check is its
 - **Done when:** the two fixture files fingerprint, and each matches its copy
   saved under an ordinary name.
 - **Needs:** nothing.
+- **Result:** the name was lost in fpcalc's own conversion of its argument to
+  UTF-8. On Windows, a path with no UTF-8 form is now fingerprinted through a
+  copy under `tmp/`. Both fixtures fingerprint, identical to their copies, and
+  a report on 646 files with no such name is byte-identical before and after
+  ([log](#log)).
 
 <a id="f6"></a>
 ### F6 · `export.pdb` is unread
@@ -727,6 +731,25 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-19 · F5** · Done. The name reaches fpcalc intact: a Python child
+  given the same argv reads it whole and finds the file. fpcalc 1.6.1 opens
+  Cyrillic and Korean names, so it converts its wide argv to UTF-8 for FFmpeg,
+  and a lone surrogate has no UTF-8 form, so it was replaced and FFmpeg
+  reported "No such file". `compute` now copies such a file into a
+  `paths.scratch` under `tmp/`, fingerprints the copy, and deletes it once
+  fpcalc exits. This happens only on Windows: on POSIX the
+  escaped bytes reach fpcalc unchanged, and the browser build is POSIX. It is a
+  copy rather than a hard link, because a link needs `tmp/` on the library's
+  volume, and FAT and exFAT have none. Fixtures: two tracks, each saved as
+  `high \ud800 surrogate.mp3` or `low \udc00 surrogate.mp3` and under a plain
+  name. Each fingerprints, with all 948 integers and the duration identical to
+  its copy's, and `tmp/` is empty afterwards. `duplicates` on the four files
+  went from 2 unfingerprintable and 0 groups to 0 and 2 groups. A file that
+  vanishes before the copy fingerprints as None, and a missing fpcalc still
+  raises. On a local folder of 646 files with no such name (2,084 candidate
+  pairs, 265 groups, 1m40s), the CSV, the JSON and the log are byte-identical
+  before and after. The reference clone has no such name, so its baseline
+  cannot move, and it was not rerun.
 - **2026-11-19 · V1** · Done, checked by hand by the owner with their own
   Spotify app and client ID: `playlist-export` and `playlist-diff` each read a
   real playlist from the CLI, from `selecta web` and from the browser build at

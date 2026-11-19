@@ -315,6 +315,16 @@ those flags can be typed after the subcommand: pass it straight through to
   agree by chance, hence the 0.85 threshold. A missing binary raises
   `RuntimeError`; a file that merely fails to decode returns `None`. Callers
   depend on that distinction. fpcalc runs through `core.tools`.
+  **On Windows, a path with no UTF-8 form is fingerprinted through a copy**
+  (`_plain_named`). fpcalc converts its wide argv to UTF-8 for FFmpeg, and a
+  lone surrogate (see [text encoding](#text-encoding)) has no UTF-8 form, so
+  the name arrived intact and FFmpeg still opened a file that does not exist.
+  The copy goes into a `paths.scratch` under `tmp/` and is deleted when fpcalc
+  exits. Do not replace it with a hard link: a link needs `tmp/` on the
+  library's volume, and FAT and exFAT have no hard links. POSIX needs no copy,
+  because `subprocess` passes escaped bytes back unchanged, and the browser
+  build is POSIX. A failed copy returns `None`, caught apart from the
+  missing-binary `FileNotFoundError`.
 - `fpcalc_fetch.py`: the escape hatch for the one dependency pip cannot install.
   `borrowed_fpcalc()` is a context manager: it yields an installed fpcalc if
   there is one (downloading nothing), otherwise it fetches the pinned
@@ -1067,9 +1077,8 @@ one.
   files share one line. The cost: a line holding such a name is not valid UTF-8,
   so an editor shows replacement characters there. **Do not move the sidecar onto
   `REPORT_ERRORS`** to make it uniform.
-
-Known, not fixed: **`fpcalc` cannot fingerprint such a file**, so
-`duplicates`/`rekordbox` count it among the unfingerprintable (plan, F5).
+- **Fingerprints**: fpcalc cannot open such a name, so on Windows
+  `core/fingerprint.py` fingerprints a copy under a plain name (plan, F5).
 
 **Verified** on fixtures (the clone's PSY pair, an untagged `Трек.mp3`, a
 playlist CSV with Korean titles, two NTFS names with lone surrogates): `catalog`
