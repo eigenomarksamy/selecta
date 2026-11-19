@@ -46,6 +46,13 @@ tickets they are an *after*, and the phase's introduction says which is which.
 A ticket that needs an open decision stays `backlog` in the Project until the
 decision is made, because a decision has no issue to link.
 
+**Size** ends each open ticket's heading, before *parked*, and is the same
+value as its issue's `Size` in the ecosystem's GitHub Project, on the
+ecosystem's scale: **xxs** takes minutes, **xs** under an hour, **s** an hour
+or two, **m** about a session, **l** two or three, **xl** four to six and
+**xxl** more. **tbd** means an open decision, a parked gate or work not yet
+planned decides it. A change to one is made to the other in the same session.
+
 **Done when** is a ticket's acceptance check. Once it holds, the ticket's
 heading ends in *done*, it gets a *Result*, and the [log](#log) records what the
 work found.
@@ -145,7 +152,7 @@ ticket in this phase needs another.
   no new limit ([log](#log)).
 
 <a id="v3"></a>
-### V3 · Firefox and Safari
+### V3 · Firefox and Safari · s
 
 - **Check:** the `webkitdirectory` picker, the module worker, and cancel through
   SharedArrayBuffer.
@@ -154,7 +161,7 @@ ticket in this phase needs another.
 - **Needs:** nothing.
 
 <a id="v4"></a>
-### V4 · Real pickers
+### V4 · Real pickers · xs
 
 - **Check:** `showDirectoryPicker` on a real folder, a drive root (`D:\`) in
   both pickers, and `master.db` picked through the real Windows file dialog.
@@ -163,7 +170,7 @@ ticket in this phase needs another.
 - **Needs:** nothing.
 
 <a id="v5"></a>
-### V5 · Browser runs at library scale
+### V5 · Browser runs at library scale · s
 
 - **Check:** `rekordbox` with fingerprints over all 3,664 tracks in a tab, and
   `quality` on a file several hours long.
@@ -171,7 +178,7 @@ ticket in this phase needs another.
 - **Needs:** nothing.
 
 <a id="v6"></a>
-### V6 · The `duplicates` stall in Edge
+### V6 · The `duplicates` stall in Edge · s
 
 - **Check:** one run over 3,664 tracks stopped after about 27 minutes of CPU,
   and the rerun finished. Repeat the run 2–3 times. If it stalls again, capture
@@ -181,7 +188,7 @@ ticket in this phase needs another.
 - **Needs:** nothing.
 
 <a id="v7"></a>
-### V7 · The three cancel paths no test could time
+### V7 · The three cancel paths no test could time · s
 
 - **Check:** the grace-period fallback, a cancel that lands as a run ends, and a
   cancel sent while the run waits behind another call.
@@ -190,7 +197,7 @@ ticket in this phase needs another.
 - **Needs:** nothing.
 
 <a id="v8"></a>
-### V8 · Encoding leftovers
+### V8 · Encoding leftovers · xs
 
 - **Check:** redirect `quality` and `playlist-export` output on a file with a
   name outside cp1252. Do one run on POSIX.
@@ -221,7 +228,7 @@ shared by `quality` and `rekordbox`. Each ticket's check is its *done when*.
   ([log](#log)).
 
 <a id="f6"></a>
-### F6 · `export.pdb` is unread
+### F6 · `export.pdb` is unread · l
 
 - **Where:** a new reader in `core`.
 - **Change:** a Python reader for the DeviceSQL tables `quality` and
@@ -275,7 +282,7 @@ wrong report. In the writers of Phases 4 and 7, it produces lost data.
 This phase needs Phase 1: the baselines are taken after its fixes.
 
 <a id="h1"></a>
-### H1 · The regression harness
+### H1 · The regression harness · l
 
 **What it is.** The script runs each command on the reference clone into a
 scratch `--out-dir`. It compares the counts and the SHA-256 of every report that
@@ -312,7 +319,7 @@ This phase needs the real Spotify login checked first ([V1](#v1)), done on
 2026-11-19.
 
 <a id="s1"></a>
-### S1 · The state root, with the saved Spotify login
+### S1 · The state root, with the saved Spotify login · m
 
 **Proposal.** A `state` root, set the way the other two are: `--state-dir`, then
 `SELECTA_STATE_DIR`, then a default. The default is per-user,
@@ -351,7 +358,7 @@ fixtures they use: L2 and L4, and L5 through them. L1 and L3 touch no library,
 so for them H1 is an *after*.
 
 <a id="l1"></a>
-### L1 · Extend the oracle from Phase 1
+### L1 · Extend the oracle from Phase 1 · s
 
 - **Change:** add `rbl-onelibrary` and `rbl-anlz` at the same pinned commit as
   `rbl-pdb` ([F6](#f6)). Diff their output on the reference USB against
@@ -362,7 +369,7 @@ so for them H1 is an *after*.
 - **Needs:** [F6](#f6). **After:** H1.
 
 <a id="l2"></a>
-### L2 · Find out what rbxport and Rekordbox import
+### L2 · Find out what rbxport and Rekordbox import · m
 
 - **Change:** Rekordbox XML is the likely format, and `rbl-db` has a module for
   it. Record which playlist fields survive the import: order, nesting and names.
@@ -371,7 +378,7 @@ so for them H1 is an *after*.
 - **Needs:** [H1](#h1). **After:** L1.
 
 <a id="l3"></a>
-### L3 · Produce playlists from reports
+### L3 · Produce playlists from reports · m
 
 - **Change:** a new feature (name to be decided) turns existing reports into
   importable playlists, written to `out/`:
@@ -383,7 +390,7 @@ so for them H1 is an *after*.
 - **Needs:** [L2](#l2), which needs H1.
 
 <a id="l4"></a>
-### L4 · Import them into Rekordbox for real
+### L4 · Import them into Rekordbox for real · s
 
 - **Change:** check against a scratch copy of `master.db` from H1's fixtures,
   never the live library. Diff the database before and after with
@@ -394,7 +401,7 @@ so for them H1 is an *after*.
 - **Needs:** [L3](#l3), [H1](#h1).
 
 <a id="l5"></a>
-### L5 · Decide on direct writes
+### L5 · Decide on direct writes · tbd
 
 - **Change:** build a writer to `master.db` only if L2–L4 show that importing
   cannot do the job. If one is built, it is its own command. It backs up
@@ -415,7 +422,7 @@ code in `core`: source adapters ([G2](#g2)) and the same-track matcher
 ([G1](#g1)).
 
 <a id="g0"></a>
-### G0 · Before either phase: re-verify the source table
+### G0 · Before either phase: re-verify the source table · s
 
 - **Change:** re-verify the README's source table, because access rules move.
   Spotify's February 2026 changes are the precedent: 10 results per search page,
@@ -432,7 +439,7 @@ and S1 is an *after* for it. G1 moves code and calls no source, so for it both
 are an *after*.
 
 <a id="g1"></a>
-#### G1 · Move the matcher
+#### G1 · Move the matcher · xs
 
 - **Change:** `playlist_diff/matching.py` moves to `core`, as rule 1 requires.
 - **Done when:** `playlist-diff`'s output stays byte-identical on the 3,628-row
@@ -440,7 +447,7 @@ are an *after*.
 - **Needs:** nothing. **After:** S1, G0.
 
 <a id="g2"></a>
-#### G2 · One adapter interface in `core`
+#### G2 · One adapter interface in `core` · s
 
 - **Change:** each source reads its key from an environment variable, and the
   command falls back to whichever sources have keys.
@@ -449,7 +456,7 @@ are an *after*.
 - **Needs:** [G0](#g0). **After:** G1, S1.
 
 <a id="g3"></a>
-#### G3 · Add the sources in order
+#### G3 · Add the sources in order · l
 
 - **Change:** MusicBrainz first, for IDs (no key, 1 request per second, a
   User-Agent header required). Then Discogs styles (a token, about 60 requests
@@ -459,7 +466,7 @@ are an *after*.
 - **Needs:** [G2](#g2), [S1](#s1), [G0](#g0).
 
 <a id="g4"></a>
-#### G4 · The report
+#### G4 · The report · s
 
 - **Change:** one CSV row per track: path, MusicBrainz IDs, Discogs styles,
   Last.fm tags, and which source and match gave each value.
@@ -468,7 +475,7 @@ are an *after*.
 - **Needs:** [G1](#g1), [G3](#g3).
 
 <a id="g5"></a>
-#### G5 · Writing tags back · parked
+#### G5 · Writing tags back · tbd · parked
 
 - **Change:** comes later, as a separate writer command, and only on request.
 - **Done when:** the writer is its own command, and its tests pass on H1's
@@ -484,7 +491,7 @@ The others need Phase 5's shared code instead: [R1](#r1) needs the matcher
 comes first, as an *after*.
 
 <a id="r1"></a>
-#### R1 · Discogs and the local cross-reference first
+#### R1 · Discogs and the local cross-reference first · l
 
 - **Change:** seeded by label: "what am I missing from this label". This needs
   one free token, and it is the half no website can do.
@@ -493,7 +500,7 @@ comes first, as an *after*.
 - **Needs:** [G1](#g1), [G3](#g3). **After:** G4.
 
 <a id="r2"></a>
-#### R2 · Exclusions
+#### R2 · Exclusions · s
 
 - **Change:** exclude anything already owned (by name, and by fingerprint where
   one exists) and anything rejected before. A file of rejections goes under the
@@ -503,14 +510,14 @@ comes first, as an *after*.
 - **Needs:** [R1](#r1), [S1](#s1).
 
 <a id="r3"></a>
-#### R3 · Every result carries why it was returned
+#### R3 · Every result carries why it was returned · s
 
 - **Change:** each result shows the hops from its seed.
 - **Done when:** every row of `dig`'s report lists the hops from its seed.
 - **Needs:** [R1](#r1).
 
 <a id="r4"></a>
-#### R4 · The underground score
+#### R4 · The underground score · tbd
 
 - **Change:** comes last. It is a composite percentile within the seed's genre,
   with each input shown in the report.
@@ -518,7 +525,7 @@ comes first, as an *after*.
 - **Needs:** [G4](#g4). **After:** R1–R3.
 
 <a id="r5"></a>
-#### R5 · `dig` in the browser build · parked
+#### R5 · `dig` in the browser build · tbd · parked
 
 - **Change:** not at first. `dig` would add at least three origins to
   `connect-src`, and whether those APIs allow CORS is unchecked.
@@ -548,7 +555,7 @@ format.
 Every ticket in this phase needs [H1](#h1).
 
 <a id="x1"></a>
-### X1 · Export to Traktor
+### X1 · Export to Traktor · l
 
 - **Change:** the export above, writing `collection.nml` to the destination.
 - **Done when:** the result loads in Traktor, and the run's report lists what
@@ -556,7 +563,7 @@ Every ticket in this phase needs [H1](#h1).
 - **Needs:** [H1](#h1).
 
 <a id="x2"></a>
-### X2 · Export to Serato
+### X2 · Export to Serato · xl
 
 - **Change:** it copies files to the destination before writing `GEOB` frames,
   and never touches the originals. Its own regression check confirms each
@@ -570,7 +577,7 @@ Every ticket in this phase needs [H1](#h1).
 One small change needs none of the phases, so it can land at any time.
 
 <a id="w1"></a>
-### W1 · A button back to eigenomar.com
+### W1 · A button back to eigenomar.com · xs
 
 - **Change:** selecta has no footer, so the button goes at the foot of the
   sidebar, in the browser branch of `.sidebar-foot` in `frontend/src/App.tsx`.
@@ -591,7 +598,7 @@ its standard is designed, and until then their issues stay in the backlog.
 Like W1, they are outside both tracks.
 
 <a id="doc1"></a>
-### DOC1 · The product's documents
+### DOC1 · The product's documents · tbd
 
 - **Change:** write or gather selecta's product vision, architecture, design,
   testing strategy, and verification and validation (V&V) documents, in the
@@ -610,7 +617,7 @@ Like W1, they are outside both tracks.
 - **Needs:** the ecosystem's document standard (`meta-eigenomar` ST1).
 
 <a id="scm1"></a>
-### SCM1 · The ecosystem's SCM strategy
+### SCM1 · The ecosystem's SCM strategy · tbd
 
 - **Change:** adopt the ecosystem's SCM strategy through its adoption
   checklist: CI, branching, protection of `main`, versioning and releases, the
