@@ -143,7 +143,7 @@ extend. What the existing structure already decides for them:
 | `frontend/` | The page's source: React 19, TypeScript 7, Vite 8. `package-lock.json` is committed, `node_modules/` is not |
 | `src/selecta/browser.py` | The browser build's Python half. **A front end like `cli.py` and `selecta.web`, not a feature**; imports no feature |
 | `frontend/src/browser/` | The browser build's page side: the API swapped in for `src/api.ts`, the Pyodide worker, the audio tools' runner (`tools.ts`), the Spotify login, `_headers` |
-| `wasm/` | The browser build's audio tools: `build.sh` (Linux or WSL only) builds fpcalc, ffprobe and `sdm_ffmpeg.c` as WebAssembly into `wasm/prebuilt/`, **committed** with its `stamp.json`, because Cloudflare's build cannot run `build.sh`. `sdm_ffmpeg` is the ffmpeg tool's name, kept so the committed modules stay as built |
+| `wasm/` | The browser build's audio tools: `build.sh` (Linux or WSL only) builds fpcalc, ffprobe and `selecta_ffmpeg.c` as WebAssembly into `wasm/prebuilt/`, **committed** with its `stamp.json`, because Cloudflare's build cannot run `build.sh` |
 | `build_browser.py` | Builds the browser version into `dist/` (gitignored): page, self-hosted Pyodide, wheels, and `wasm/prebuilt/`'s modules |
 | `wrangler.jsonc` | Cloudflare Workers config serving `dist/` at selecta.eigenomar.com. `.wrangler/` is its gitignored state |
 | `docs/rekordbox.md` | Detailed Rekordbox reference |
@@ -800,7 +800,7 @@ What is load-bearing:
   1.6.1's own `fpcalc.cpp` and ffprobe is FFmpeg 7.1.1's own, both built against
   FFmpeg 7.1.1 audio-only. **ffmpeg is not ffmpeg:** since 6.0 the ffmpeg program
   requires threads, and 5.1, the last without, prints no decode-error count and
-  decodes differently. So `wasm/sdm_ffmpeg.c` is the one command line `quality`
+  decodes differently. So `wasm/selecta_ffmpeg.c` is the one command line `quality`
   runs, on the 7.1.1 libraries, mirroring fftools where `measure.py` looks: the
   first audio stream, others discarded, `threads=auto`, errors counted as fftools
   counts them, the guessed channel layout for a bare channel count (WAVs without

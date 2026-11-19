@@ -1,5 +1,5 @@
 /*
- * sdm_ffmpeg: the one ffmpeg invocation `sdm quality` makes, for the browser build.
+ * selecta_ffmpeg: the one ffmpeg invocation `selecta quality` makes, for the browser build.
  *
  *   ffmpeg -nostdin -hide_banner -nostats -v verbose -i PATH -map 0:a:0
  *          -af FILTERGRAPH -f f32le -
@@ -91,13 +91,13 @@ static int parse(int argc, char **argv, Options *o)
             continue;
         } else if ((!strcmp(a, "-v") || !strcmp(a, "-loglevel")) && next) {
             if (set_level(next) < 0)
-                return fail("sdm_ffmpeg: unknown log level");
+                return fail("selecta_ffmpeg: unknown log level");
             i++;
         } else if (!strcmp(a, "-i") && next && !o->input) {
             o->input = argv[++i];
         } else if (!strcmp(a, "-map") && next) {
             if (strcmp(next, "0:a:0"))
-                return fail("sdm_ffmpeg: only -map 0:a:0 is supported");
+                return fail("selecta_ffmpeg: only -map 0:a:0 is supported");
             i++;
         } else if (!strcmp(a, "-af") && next) {
             o->filters = argv[++i];
@@ -106,16 +106,16 @@ static int parse(int argc, char **argv, Options *o)
         } else if (i == argc - 1 && (!strcmp(a, "-") || a[0] != '-')) {
             o->output = a;
         } else {
-            av_log(NULL, AV_LOG_FATAL, "sdm_ffmpeg: unsupported option '%s'\n", a);
+            av_log(NULL, AV_LOG_FATAL, "selecta_ffmpeg: unsupported option '%s'\n", a);
             return 1;
         }
     }
     if (!o->input || !o->output)
-        return fail("sdm_ffmpeg: usage: -i INPUT [-map 0:a:0] [-af FILTERS] -f f32le -");
+        return fail("selecta_ffmpeg: usage: -i INPUT [-map 0:a:0] [-af FILTERS] -f f32le -");
     if (!o->format || strcmp(o->format, "f32le"))
-        return fail("sdm_ffmpeg: only -f f32le is supported");
+        return fail("selecta_ffmpeg: only -f f32le is supported");
     if (strcmp(o->output, "-") && strcmp(o->output, "pipe:1") && strcmp(o->output, "pipe:"))
-        return fail("sdm_ffmpeg: only standard output (-) is supported");
+        return fail("selecta_ffmpeg: only standard output (-) is supported");
     return 0;
 }
 

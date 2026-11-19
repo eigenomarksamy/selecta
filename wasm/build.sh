@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 # Builds the audio tools the browser build runs, as WebAssembly: fpcalc,
-# ffprobe, and sdm_ffmpeg (this folder's sdm_ffmpeg.c).
+# ffprobe, and selecta_ffmpeg (this folder's selecta_ffmpeg.c).
 #
 # Natively `duplicates` and `rekordbox` run fpcalc, and `quality` runs ffprobe
 # and ffmpeg, as processes. A tab has no processes, so frontend/src/browser/
 # tools.ts instantiates these modules afresh for every run instead, and Python
-# reaches them through sdm.core.tools's `runner` hook with the same argv.
+# reaches them through selecta.core.tools's `runner` hook with the same argv.
 #
-#   fpcalc       Chromaprint 1.6.1's own fpcalc.cpp - the release
-#                core/fpcalc_fetch.py borrows natively - built as Chromaprint's
-#                release builds are: FFmpeg's av_tx FFT and swresample.
-#   ffprobe      FFmpeg 7.1.1's own ffprobe, the version `quality` was measured
-#                with natively.
-#   sdm_ffmpeg   The one ffmpeg command line `quality` runs, on the same 7.1.1
-#                libraries. Not ffmpeg itself: since 6.0 that needs threads, and
-#                these run single-threaded and synchronously. See sdm_ffmpeg.c.
+#   fpcalc          Chromaprint 1.6.1's own fpcalc.cpp - the release
+#                   core/fpcalc_fetch.py borrows natively - built as
+#                   Chromaprint's release builds are: FFmpeg's av_tx FFT and
+#                   swresample.
+#   ffprobe         FFmpeg 7.1.1's own ffprobe, the version `quality` was
+#                   measured with natively.
+#   selecta_ffmpeg  The one ffmpeg command line `quality` runs, on the same
+#                   7.1.1 libraries. Not ffmpeg itself: since 6.0 that needs
+#                   threads, and these run single-threaded and synchronously.
+#                   See selecta_ffmpeg.c.
 #
 # Run on Linux or in WSL, and not on /mnt/c: it builds in $WORK (the home
 # directory by default), because building FFmpeg across the Windows mount is
@@ -44,7 +46,7 @@ CHROMAPRINT_SHA256=3368805af0ee47b9df74df10b5001a44569e01df2844dab520031720dde9a
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 OUT="${1:-$HERE/prebuilt}"
-WORK="${WORK:-$HOME/.cache/sdm-ffmpeg-wasm}"
+WORK="${WORK:-$HOME/.cache/selecta-ffmpeg-wasm}"
 PREFIX="$WORK/prefix"
 JOBS="$(nproc)"
 mkdir -p "$WORK" "$PREFIX" "$OUT"
@@ -135,8 +137,8 @@ mkdir -p "$WORK/out"
 em++ "${LINK[@]}" -o "$WORK/out/ffprobe.mjs" \
   "$FF/fftools/ffprobe.o" "$FF/fftools/cmdutils.o" "$FF/fftools/opt_common.o" "${LIBS[@]}"
 
-emcc -O3 -sUSE_ZLIB=1 -I"$PREFIX/include" -c "$HERE/sdm_ffmpeg.c" -o "$WORK/sdm_ffmpeg.o"
-em++ "${LINK[@]}" -o "$WORK/out/sdm_ffmpeg.mjs" "$WORK/sdm_ffmpeg.o" "${LIBS[@]}"
+emcc -O3 -sUSE_ZLIB=1 -I"$PREFIX/include" -c "$HERE/selecta_ffmpeg.c" -o "$WORK/selecta_ffmpeg.o"
+em++ "${LINK[@]}" -o "$WORK/out/selecta_ffmpeg.mjs" "$WORK/selecta_ffmpeg.o" "${LIBS[@]}"
 
 em++ -O3 -std=c++11 -DHAVE_CONFIG_H -I"$CP/build" -I"$CP/src" -I"$PREFIX/include" \
   -c "$CP/src/cmd/fpcalc.cpp" -o "$WORK/fpcalc.o"
@@ -167,7 +169,7 @@ python3 - "$HERE" "$OUT" <<'PY'
 import hashlib, json, sys
 from pathlib import Path
 here, out = Path(sys.argv[1]), Path(sys.argv[2])
-SOURCES = ("build.sh", "sdm_ffmpeg.c")
+SOURCES = ("build.sh", "selecta_ffmpeg.c")
 stamp = {
     "sources": {name: hashlib.sha256((here / name).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
                 for name in SOURCES},

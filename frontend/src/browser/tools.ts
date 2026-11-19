@@ -1,4 +1,4 @@
-// The audio tools the browser build runs: fpcalc, ffprobe and sdm_ffmpeg,
+// The audio tools the browser build runs: fpcalc, ffprobe and selecta_ffmpeg,
 // WebAssembly builds of the same releases selecta runs natively (wasm/build.sh).
 //
 // Natively they are processes, started by `core.tools.run`. Here Python calls
@@ -62,7 +62,7 @@ export interface ToolResult {
 export type Provide = (fs: ToolFs, path: string) => void;
 
 /** The module file behind each name `core.tools` runs. */
-export const TOOL_FILES: Record<string, string> = { fpcalc: "fpcalc", ffprobe: "ffprobe", ffmpeg: "sdm_ffmpeg" };
+export const TOOL_FILES: Record<string, string> = { fpcalc: "fpcalc", ffprobe: "ffprobe", ffmpeg: "selecta_ffmpeg" };
 
 /** stdout is handed to Python in pieces of about this size, not per write: each hand-over crosses into Python. */
 const HANDOVER_BYTES = 256 * 1024;

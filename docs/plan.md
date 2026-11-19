@@ -135,7 +135,8 @@ ticket in this phase needs another.
   list gets the `/me` 403 message. Otherwise, the README records the limit.
 - **Before the check:** the Spotify app lists `https://selecta.eigenomar.com/`
   among its redirect URIs. The browser build sends its own origin, so a login
-  from the live site fails until it is registered.
+  from the live site fails until it is registered. Done on 2026-11-19
+  ([log](#log)).
 - **Needs:** nothing.
 
 <a id="v3"></a>
@@ -225,7 +226,7 @@ shared by `quality` and `rekordbox`. Do F5 first. Each ticket's check is its
 - **Needs:** nothing. **After:** F5.
 
 <a id="f7"></a>
-### F7 · The ffmpeg tool still carries the old prefix
+### F7 · The ffmpeg tool still carries the old prefix · *done*
 
 - **Where:** `wasm/sdm_ffmpeg.c`, `wasm/build.sh`, `wasm/prebuilt/`,
   `build_browser.py`'s `TOOL_FILES` and `TOOL_SOURCES`,
@@ -240,6 +241,9 @@ shared by `quality` and `rekordbox`. Do F5 first. Each ticket's check is its
   accepts the new stamp, and `quality` in the browser build gives the same
   output as before the rename on the same files.
 - **Needs:** nothing, though the rebuild needs Linux or WSL. **After:** F5.
+- **Result:** the tool is `selecta_ffmpeg`, rebuilt into `wasm/prebuilt/` with
+  a new stamp, and `quality`'s report is byte-identical before and after on
+  23 files ([log](#log)). Done before F5, which was only an *after*.
 
 ### Deferred on purpose
 
@@ -717,6 +721,29 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-19 · F7** · Done: the ffmpeg tool is `selecta_ffmpeg`, in
+  `wasm/selecta_ffmpeg.c`, its error messages, `build.sh`, `build_browser.py`'s
+  `TOOL_FILES` and `TOOL_SOURCES`, `tools.ts`'s `TOOL_FILES`, and the README's
+  and CLAUDE.md's lines. `build.sh`'s cache folder is `selecta-ffmpeg-wasm` and
+  its comment names `selecta.core.tools`. The rebuild in WSL took 2m38s, with
+  the old cache's Emscripten and tarballs copied in, so FFmpeg was configured
+  afresh: ffprobe embeds its configure line, which named the old cache folder.
+  `fpcalc.wasm` and every `.mjs` but the renamed one came out byte-identical,
+  and `build_browser.py --no-install` accepts the new stamp. `git grep -i` for
+  the old prefix finds only this plan. Checked on 23 local files (10 MP3, 4 WAV,
+  2 M4A, 4 FLAC, 3 AIFF), with each tool run in Node through the same glue and
+  calls as `tools.ts`: fpcalc's and ffprobe's output and the ffmpeg tool's
+  samples are byte-identical to the old modules', and its stderr differs only
+  in heap addresses, each 0x10 higher. `quality --no-rekordbox --jobs 1` on the
+  23 files, with `core.tools.runner` set to the WebAssembly tools as
+  `selecta.browser` sets it, writes a byte-identical report on the old and new
+  modules. Under `wrangler dev` the page serves `tools/<hash>/selecta_ffmpeg`
+  with its COOP, COEP and immutable caching, and the old name is a 404. Not
+  done: a `quality` run through the page's own form.
+- **2026-11-19 · V1** · The Spotify app lists `https://selecta.eigenomar.com/`
+  among its redirect URIs, and the owner logged in from the live site. V1's
+  check, both commands from all three front ends and the `/me` 403, is still
+  to run.
 - **2026-11-18 · plan** · F7 added, at the owner's request: the ffmpeg tool,
   its build's cache folder and a comment still carry the old prefix, and
   renaming them means rebuilding `wasm/prebuilt/`.

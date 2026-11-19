@@ -884,7 +884,7 @@ in the tab instead, which takes a couple of seconds, with the same result.
 ### Build and deploy
 
 ```ps1
-wsl bash wasm/build.sh               # fpcalc, ffprobe, sdm_ffmpeg as WebAssembly -> wasm/prebuilt/
+wsl bash wasm/build.sh               # fpcalc, ffprobe, selecta_ffmpeg as WebAssembly -> wasm/prebuilt/
 python build_browser.py              # npm ci, the page, Pyodide, the wheels, the tools -> dist/
 python build_browser.py --no-install # the same without npm ci
 python build_browser.py --without-tools  # no tools: duplicates and quality left offline
@@ -897,7 +897,7 @@ first time); rerun it only when `wasm/` changes, **and commit
 `wasm/prebuilt/`** afterwards. Cloudflare's build has no Emscripten, so the
 modules reach it through the repository. `stamp.json` beside them records what
 they were built from; `build_browser.py` checks it first thing and stops if
-`build.sh` or `sdm_ffmpeg.c` has changed since, so a change to `wasm/` cannot
+`build.sh` or `selecta_ffmpeg.c` has changed since, so a change to `wasm/` cannot
 deploy with tools built before it.
 
 `build_browser.py` needs Node and Python with pip, and the network at build
