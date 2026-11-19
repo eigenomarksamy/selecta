@@ -28,7 +28,7 @@ export function ReportsPage() {
       <header className="page-head">
         <h1>Reports</h1>
         <p className="muted">
-          Everything under <code>{data.root}</code>, newest first in each folder.
+          Everything under <code className="as-is">{data.root}</code>, newest first in each folder.
         </p>
       </header>
       {names.length === 0 && <Empty>No reports yet. Run a command and they appear here.</Empty>}
@@ -50,7 +50,7 @@ export function ReportsPage() {
               {groups.get(name)!.map((f) => (
                 <tr key={f.rel}>
                   <td>
-                    <a href={href("/report", { path: f.rel })}>{f.rel.slice(name.length + 1) || f.name}</a>
+                    <a className="as-is" href={href("/report", { path: f.rel })}>{f.rel.slice(name.length + 1) || f.name}</a>
                   </td>
                   <td className="muted">{viewLabel(f.rel)}</td>
                   <td className="num muted">{bytes(f.size)}</td>

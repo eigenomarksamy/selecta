@@ -133,9 +133,10 @@ function GroupCard({ group, playGroup }: { group: DupGroup; playGroup: string })
   const rows = all ? group.tracks : group.tracks.slice(0, TRACKS_SHOWN);
 
   // Which columns differ between the copies: often the whole story (a FLAC and
-  // an MP3 of one release, or one file mis-tagged).
+  // an MP3 of one release, or one file mis-tagged). Exactly, case included,
+  // since the cells show what the tags hold.
   const differs = (get: (t: DupTrack) => unknown) =>
-    new Set(group.tracks.map((t) => String(get(t) ?? "").toLowerCase())).size > 1;
+    new Set(group.tracks.map((t) => String(get(t) ?? ""))).size > 1;
   const diff = {
     title: differs((t) => t.title),
     artist: differs((t) => t.artist),
@@ -182,15 +183,15 @@ function GroupCard({ group, playGroup }: { group: DupGroup; playGroup: string })
                   item={{ path: t.file_path, title: t.title || baseName(t.file_path), subtitle: t.artist, group: playGroup }}
                 />
               </td>
-              <td className={diff.title ? "diff" : ""}>{t.title}</td>
-              <td className={diff.artist ? "diff" : ""}>{t.artist}</td>
+              <td className={`as-is ${diff.title ? "diff" : ""}`}>{t.title}</td>
+              <td className={`as-is ${diff.artist ? "diff" : ""}`}>{t.artist}</td>
               <td className={`num ${diff.bpm ? "diff" : ""}`}>{t.bpm ?? ""}</td>
-              <td className={diff.key ? "diff" : ""}>{t.key ?? ""}</td>
+              <td className={`as-is ${diff.key ? "diff" : ""}`}>{t.key ?? ""}</td>
               <td className="num">{clock(t.duration_seconds, true)}</td>
               <td className={diff.format ? "diff" : ""}>{extension(t.file_path).toUpperCase()}</td>
               <td className="file-cell" title={t.file_path}>
-                <span className="file-name">{baseName(t.file_path)}</span>
-                <span className={`file-folder ${diff.folder ? "diff" : ""}`}>{dirName(t.file_path)}</span>
+                <span className="file-name as-is">{baseName(t.file_path)}</span>
+                <span className={`file-folder as-is ${diff.folder ? "diff" : ""}`}>{dirName(t.file_path)}</span>
               </td>
               <td>
                 <CopyButton text={t.file_path} label="Copy path" />

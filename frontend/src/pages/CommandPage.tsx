@@ -136,7 +136,7 @@ export function CommandPage({
             <ul className="plain-list">
               {reports.map((r) => (
                 <li key={r.rel}>
-                  <a href={href("/report", { path: r.rel })}>{r.name}</a>{" "}
+                  <a className="as-is" href={href("/report", { path: r.rel })}>{r.name}</a>{" "}
                   <span className="muted">{ago(r.mtime)}</span>
                 </li>
               ))}

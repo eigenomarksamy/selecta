@@ -71,7 +71,7 @@ export function ReportPage({ path, forceTable }: { path: string; forceTable: boo
     <div className="page">
       <header className="page-head">
         <div className="crumbs">
-          <a href={href("/reports")}>Reports</a> / <span className="mono">{path}</span>
+          <a href={href("/reports")}>Reports</a> / <span className="mono as-is">{path}</span>
         </div>
         <div className="toolbar">
           {info && (

@@ -88,7 +88,7 @@ export function Home({ commands, jobs, session }: { commands: Command[]; jobs: J
             <ul className="plain-list">
               {reports.slice(0, 8).map((r) => (
                 <li key={r.rel}>
-                  <a href={href("/report", { path: r.rel })}>{r.rel}</a>{" "}
+                  <a className="as-is" href={href("/report", { path: r.rel })}>{r.rel}</a>{" "}
                   <span className="muted">
                     {viewLabel(r.rel)} · {ago(r.mtime)}
                   </span>

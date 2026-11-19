@@ -58,9 +58,10 @@ body {
   background: var(--bg);
   color: var(--text);
   font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* All text on the page is lowercase: labels, the argparse help the forms are
-     built from, logs and report data alike. A rule rather than lowercased
-     strings, because most of what shows comes from the server. */
+  /* The page's own text is lowercase: labels, headings, and the argparse help
+     the forms are built from. A rule rather than lowercased strings, because
+     most of what shows comes from the server. What the page shows from a
+     source is exempt: see .as-is below. */
   text-transform: lowercase;
 }
 /* The browser's own stylesheet gives form controls text-transform: none, so
@@ -70,6 +71,13 @@ button,
 select,
 ::placeholder {
   text-transform: lowercase;
+}
+/* What selecta read rather than wrote keeps its case: titles, artists, albums,
+   keys and encoders from tags, Spotify and Rekordbox; file, folder, playlist and
+   report names; paths; a run's command line and its log; a report table's
+   cells. A track called "DNA" is not "dna". */
+.as-is {
+  text-transform: none;
 }
 
 a {

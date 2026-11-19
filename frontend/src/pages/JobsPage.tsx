@@ -35,7 +35,7 @@ export function JobsPage({ jobs }: { jobs: JobSummary[] }) {
                 <td>
                   <StatusBadge status={j.status} cancelling={j.cancel_requested} />
                 </td>
-                <td className="mono">
+                <td className="mono as-is">
                   <a href={href(`/jobs/${j.id}`)}>{j.display}</a>
                 </td>
                 <td className="muted">{ago(j.started)}</td>

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, ApiError } from "../api";
 import { CopyButton, Empty, ErrorBox } from "../components";
 import { baseName, clock, dirName, isAudioPath, plural } from "../format";
@@ -247,11 +247,11 @@ function QualityRow({ row: r, open, onToggle }: { row: Row; open: boolean; onTog
         </button>
       </td>
       <td className="file-cell" title={r.file_path}>
-        <span className="file-name">
+        <span className="file-name as-is">
           {titled ? r.title : baseName(r.file_path)}
           {r.artist && r.artist !== "Unknown" && <span className="muted"> · {r.artist}</span>}
         </span>
-        <span className="file-sub">{titled ? baseName(r.file_path) : baseName(dirName(r.file_path))}</span>
+        <span className="file-sub as-is">{titled ? baseName(r.file_path) : baseName(dirName(r.file_path))}</span>
       </td>
       <td>
         <Issues row={r} />
@@ -259,7 +259,7 @@ function QualityRow({ row: r, open, onToggle }: { row: Row; open: boolean; onTog
       <td>
         {r.codec.toUpperCase()}
         {r.encoder && (
-          <div className="claims encoder" title={r.encoder}>
+          <div className="claims encoder as-is" title={r.encoder}>
             {r.encoder}
           </div>
         )}
@@ -337,8 +337,10 @@ function Detail({ row: r }: { row: Row }) {
   const sentences = r.flags ? r.flags.split("; ") : [];
   const rbNote = r.rb_match ? `matched by ${r.rb_match}` : "no row matched";
 
-  const aspects: [string, string, string, string, { meta?: boolean; rb?: boolean }?][] = [
-    ["Format", r.codec.toUpperCase(), r.encoder || "", ""],
+  // The file-metadata column is selecta's formatting of the file's numbers, except
+  // the encoder, which is the file's own text.
+  const aspects: [string, string, ReactNode, string, { meta?: boolean; rb?: boolean }?][] = [
+    ["Format", r.codec.toUpperCase(), r.encoder && <span className="as-is">{r.encoder}</span>, ""],
     [
       "Bitrate",
       kbps(r.bitrate_kbps, true),
@@ -401,7 +403,7 @@ function Detail({ row: r }: { row: Row }) {
   return (
     <div className="quality-detail">
       <div className="toolbar">
-        <span className="mono small" title={r.file_path}>
+        <span className="mono small as-is" title={r.file_path}>
           {dirName(r.file_path)}
         </span>
         <span className="spacer" />

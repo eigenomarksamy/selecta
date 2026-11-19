@@ -238,14 +238,14 @@ export function PathPicker({
                 className={`fs-entry ${entry.dir ? "dir" : "file"}`}
                 onClick={() => (entry.dir ? void open(entry.path) : onPick(entry.path))}
               >
-                <span aria-hidden>{entry.dir ? "📁" : "📄"}</span> {entry.name}
+                <span aria-hidden>{entry.dir ? "📁" : "📄"}</span> <span className="as-is">{entry.name}</span>
               </button>
             </li>
           ))}
           {listing && listing.entries.length === 0 && <li className="muted">Nothing here.</li>}
         </ul>
         <div className="modal-foot">
-          <span className="muted mono">{listing?.path || "This computer"}</span>
+          <span className={`muted mono ${listing?.path ? "as-is" : ""}`}>{listing?.path || "This computer"}</span>
           {mode === "dir" && (
             <button className="primary" disabled={!listing?.path} onClick={() => listing && onPick(listing.path)}>
               Use this folder

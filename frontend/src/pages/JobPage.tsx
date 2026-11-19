@@ -90,7 +90,7 @@ export function JobPage({ id, onChange }: { id: string; onChange: () => void }) 
           Job {job.id} <StatusBadge status={job.status} cancelling={job.cancel_requested} />
         </h1>
         <div className="command-line">
-          <code>{job.display}</code>
+          <code className="as-is">{job.display}</code>
           <CopyButton text={job.display} />
         </div>
         <p className="muted">
@@ -176,9 +176,11 @@ function Outputs({ outputs }: { outputs: JobOutput[] }) {
         {outputs.map((o) => (
           <li key={o.path}>
             {o.exists ? (
-              <a href={href("/report", { path: o.rel ?? o.path })}>{o.rel ?? o.path}</a>
+              <a className="as-is" href={href("/report", { path: o.rel ?? o.path })}>{o.rel ?? o.path}</a>
             ) : (
-              <span className="muted">{o.path} (gone)</span>
+              <span className="muted">
+                <span className="as-is">{o.path}</span> (gone)
+              </span>
             )}{" "}
             {o.exists && <span className="muted">{viewLabel(o.rel ?? o.path)}</span>}
           </li>
@@ -192,7 +194,7 @@ const LogChunk = memo(function LogChunk({ lines }: { lines: LogLine[] }) {
   return (
     <>
       {lines.map(([stream, text], i) => (
-        <div key={i} className={`log-line ${stream === "err" ? "err" : ""} ${/^error\b/i.test(text) ? "fatal" : ""}`}>
+        <div key={i} className={`log-line as-is ${stream === "err" ? "err" : ""} ${/^error\b/i.test(text) ? "fatal" : ""}`}>
           {linkify(text)}
         </div>
       ))}

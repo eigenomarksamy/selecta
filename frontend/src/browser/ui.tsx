@@ -72,7 +72,7 @@ export function SpotifyLogin({ browser }: { browser: BrowserHooks }) {
           <>
             <div className="input-row">
               <span className="spotify-who">
-                Logged in{state.user && <> as <strong>{state.user}</strong></>}.
+                Logged in{state.user && <> as <strong className="as-is">{state.user}</strong></>}.
               </span>
               <button type="button" className="ghost" onClick={browser.spotify.logout}>
                 Log out
@@ -224,7 +224,7 @@ export function PathPickRow({
       </div>
     );
   } else if (picked) {
-    status = <p className="help">Picked: {picked}.</p>;
+    status = <p className="help">Picked: <span className="as-is">{picked}</span>.</p>;
   } else if (folder) {
     status = (
       <p className="help">

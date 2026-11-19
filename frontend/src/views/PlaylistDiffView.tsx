@@ -74,7 +74,7 @@ export function PlaylistDiffView({
       <div className="stats">
         <div className="stat">
           <strong>{total ? Math.round((100 * owned.length) / total) : 0}%</strong>
-          <span>of “{name}” in the folder</span>
+          <span>of “<span className="as-is">{name}</span>” in the folder</span>
         </div>
         <div className="stat">
           <strong>{missingCount.toLocaleString()}</strong>
@@ -147,8 +147,8 @@ export function PlaylistDiffView({
               {rows.map((r) => (
                 <tr key={r["#"]}>
                   <td className="num muted">{r["#"]}</td>
-                  <td>{r.artist}</td>
-                  <td>{r.title}</td>
+                  <td className="as-is">{r.artist}</td>
+                  <td className="as-is">{r.title}</td>
                   <td className="num">{r.duration}</td>
                   <td>
                     <LocalFile path={r.local_file} title={r.title} artist={r.artist} />
@@ -178,9 +178,9 @@ export function PlaylistDiffView({
               {rows.map((r) => (
                 <tr key={r["#"]}>
                   <td className="num muted">{r["#"]}</td>
-                  <td>{r.artist}</td>
-                  <td>{r.title}</td>
-                  <td className="muted">{r.album}</td>
+                  <td className="as-is">{r.artist}</td>
+                  <td className="as-is">{r.title}</td>
+                  <td className="muted as-is">{r.album}</td>
                   <td className="num">{r.duration}</td>
                   {tab !== "missing" && (
                     <td>
@@ -188,7 +188,7 @@ export function PlaylistDiffView({
                         <LocalFile path={r.closest_local_file} title={r.title} artist={r.artist} />
                       )}
                       {r.local_duration && <span className="muted small"> · {r.local_duration}</span>}
-                      {r.note && <div className="muted small">{r.note}</div>}
+                      {r.note && <div className="muted small as-is">{r.note}</div>}
                     </td>
                   )}
                   <td className="nowrap">
@@ -197,7 +197,7 @@ export function PlaylistDiffView({
                         Open ↗
                       </a>
                     ) : (
-                      <span className="muted">{r.isrc}</span>
+                      <span className="muted as-is">{r.isrc}</span>
                     )}
                   </td>
                 </tr>
@@ -214,7 +214,7 @@ function LocalFile({ path, title, artist }: { path: string; title: string; artis
   return (
     <span className="with-play">
       <PlayButton item={{ path, title: title || baseName(path), subtitle: artist }} />
-      <span className="mono" title={path}>
+      <span className="mono as-is" title={path}>
         {baseName(path)}
       </span>
     </span>

@@ -90,9 +90,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         <div className="player-label">
           {current && (
             <>
-              <strong title={current.path}>{current.title || baseName(current.path)}</strong>
+              <strong className="as-is" title={current.path}>{current.title || baseName(current.path)}</strong>
               <span className="muted">
-                {current.subtitle ?? ""}
+                <span className="as-is">{current.subtitle ?? ""}</span>
                 {current.group ? " · switching within this group keeps the position" : ""}
               </span>
               {error && <span className="error-text">{error}</span>}

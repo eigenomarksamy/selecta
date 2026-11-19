@@ -97,7 +97,7 @@ export function TableView({ path }: { path: string }) {
             {page.rows.map((row, r) => (
               <tr key={offset + r}>
                 {page.header.map((_, c) => (
-                  <td key={c}>
+                  <td key={c} className="as-is">
                     <Cell value={row[c] ?? ""} />
                   </td>
                 ))}
