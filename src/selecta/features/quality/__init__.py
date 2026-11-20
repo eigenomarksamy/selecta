@@ -11,8 +11,9 @@ The premise is `selecta analyze`'s: a stated bitrate is a claim by whoever encod
 the file, exactly as a TBPM tag is a claim against the beat grid.
 
 Read-only: files are decoded, never written. Needs ffmpeg and ffprobe on PATH
-and numpy (`pip install -e ".[quality]"`); the Rekordbox columns also need
-pyrekordbox and are left blank without it.
+and numpy (`pip install -e ".[quality]"`). The Rekordbox columns come from the
+local library, which needs pyrekordbox, or else from a USB's own `export.pdb`,
+which needs nothing; without either they are left blank.
 """
 from __future__ import annotations
 
@@ -50,8 +51,10 @@ def add_parser(subparsers, parents=()) -> argparse.ArgumentParser:
                    help="Stop after the first N files. For sampling a library "
                         "before the full run, which takes ~2s of CPU per track.")
     p.add_argument("--db-path", default=None, metavar="PATH",
-                   help="Read Rekordbox's claims from this master.db instead of "
-                        "the local Rekordbox library's.")
+                   help="Read Rekordbox's claims from this master.db, or a USB's "
+                        "export.pdb, instead of the local Rekordbox library's. "
+                        "Without it, a USB's own export.pdb is read when the "
+                        "local library cannot be.")
     p.add_argument("--no-rekordbox", action="store_true",
                    help="Do not read any Rekordbox database; compare against the "
                         "files' own metadata only.")

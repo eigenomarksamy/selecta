@@ -9,6 +9,11 @@ and walking its content rows. What each feature makes of a row stays in the
 feature; `RekordboxFile` is this module's own conversion, kept plain so
 `quality` never sees a pyrekordbox ORM object.
 
+A USB's own `export.pdb` is the third source, read by `core.pdb` without
+pyrekordbox: `load_export_files` turns its tracks into the same
+`RekordboxFile`s, so a USB with no library behind it still has Rekordbox's
+claims.
+
 Read-only, like everything that opens the database: pyrekordbox is only ever
 asked to query. Where sqlcipher3 is missing the query runs against a
 decrypted copy (`open_database`), which is no less read-only for the original.
@@ -142,6 +147,32 @@ def load_files(db_path: Optional[str] = None, *, log: Optional[Callable[[str], N
                 )
             )
     return files
+
+
+def load_export_files(pdb_path: str) -> list[RekordboxFile]:
+    """One `RekordboxFile` per track in a USB's own `export.pdb` (`core.pdb`).
+
+    The same claims as `load_files`, from the database the USB carries rather
+    than the library it was exported from, so a USB on its own has them. Paths
+    are the USB's `/Contents/...`, made absolute under the USB the file sits on.
+    Stdlib only: no pyrekordbox, no decryption, since the file is not encrypted.
+    """
+    from selecta.core.pdb import FILE_TYPES, on_disk, read_tracks, usb_root
+
+    root = usb_root(pdb_path)
+    return [
+        RekordboxFile(
+            file_path=on_disk(root, t.file_path),
+            file_size=_positive(t.file_size),
+            file_type=FILE_TYPES.get(t.file_type, f"type {t.file_type}") if t.file_type else None,
+            bitrate_kbps=_positive(t.bitrate_kbps),
+            sample_rate=_positive(t.sample_rate),
+            bit_depth=_positive(t.bit_depth),
+            duration_seconds=_positive(t.duration_seconds),
+        )
+        for t in read_tracks(pdb_path)
+        if t.file_path
+    ]
 
 
 def _positive(value) -> Optional[int]:

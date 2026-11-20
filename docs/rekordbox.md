@@ -26,19 +26,23 @@ Three independent modes (pick one per run):
 When you point the tool at a USB, it resolves the track list in this order:
 
 1. A `master.db` given directly via `--db-path`, or one found on the USB.
-2. The **local Rekordbox `master.db`** (pyrekordbox auto-locates it). This is the
-   only source that carries the analyzed BPM and key, so it is preferred even
-   when a USB is supplied. With `--usb-path`, the result is then scoped to the
-   tracks actually on the USB (matched by filename), and any USB files missing
-   from the local database are filled in from their ID3 tags (BPM/key may be
-   blank for those).
-3. **ID3 tags** from the USB's `Contents/` folder — last resort, used only if the
-   local database can't be opened. BPM/key are sparse here because Rekordbox
-   stores analysis in its database, not in the audio files.
+2. The **local Rekordbox `master.db`** (pyrekordbox auto-locates it). It is
+   preferred even when a USB is supplied. With `--usb-path`, the result is then
+   scoped to the tracks actually on the USB (matched by filename), and any USB
+   files missing from the local database are filled in from their ID3 tags
+   (BPM/key may be blank for those).
+3. The **USB's own `export.pdb`** (`PIONEER/rekordbox/export.pdb`), used when
+   the local database can't be opened, or given directly as `--db-path`. It
+   carries the analyzed BPM and key Rekordbox exported with the tracks, matched
+   to the USB's files by path; files it has no row for are read from their ID3
+   tags. It is plain DeviceSQL, not encrypted, and is read by selecta itself
+   (`core/pdb.py`), with no extra installed.
+4. **ID3 tags** from the USB's `Contents/` folder — last resort. BPM/key are
+   sparse here because Rekordbox stores analysis in its database, not in the
+   audio files.
 
-> The exported USB databases (`export.pdb` / `exportLibrary.db`) are encrypted
-> DeviceSQL and are **not** readable by the installed pyrekordbox, so they are
-> skipped automatically.
+> `exportLibrary.db`, the newer SQLCipher database beside `export.pdb`, is not
+> read.
 
 ## How audio-based duplicate detection works
 

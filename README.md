@@ -58,11 +58,11 @@ feature as a whole; the rows under it are its parts.
 | | Borrowed `fpcalc` | Fetches a pinned Chromaprint into `tmp/` for the run, then deletes it — including on Ctrl-C | `--fpcalc-path`, `--no-fetch-fpcalc` | done |
 | | Acting on the results | Moving or deleting what it finds | — | planned, deliberately — the report is the output |
 | `rekordbox` | *(the command)* | Reads a Rekordbox library — track list plus **analyzed** BPM, key and duration — and exports it or reports duplicates. **Read-only** | `--usb-path` or `--db-path`; else the local install | partial |
-| | Source resolution | USB `master.db`, then the local one scoped to the USB (the only source with analyzed BPM and key), then raw ID3 tags | `--usb-path`, `--db-path` | done |
+| | Source resolution | USB `master.db`, then the local one scoped to the USB, then the USB's own `export.pdb`, then raw ID3 tags | `--usb-path`, `--db-path` | done |
 | | Track export | Title, artist, BPM, duration and key to CSV | `--export-csv`, bare or with a path | done |
 | | Duplicates by name | Title and artist alone, so it covers every track and needs no analysis | `--duplicates-by-name` | partial — blank artists on a local-DB-only run; attaching the USB fills them |
 | | Duplicates by fingerprint | The detector `duplicates` uses, with BPM and key required | Tolerance and threshold flags, `--fpcalc-path`, `--no-fetch-fpcalc` | done — borrows `fpcalc` when none is installed, and pre-flights it, as `duplicates` does |
-| | Reading the exported database | `export.pdb` / `exportLibrary.db` off the USB | — | planned — encrypted DeviceSQL, skipped |
+| | Reading the exported database | `export.pdb` off the USB: tracks with their exported BPM, key, artist and album, with no install and nothing to decrypt | The USB's `PIONEER/rekordbox/export.pdb`, or `--db-path` | done — rows equal rbxport's `rbl-pdb`'s; `exportLibrary.db` is not read |
 | | Playlists | Reading and managing them | — | planned |
 | `analyze` | *(the command)* | Reads **Rekordbox's own analysis** off a Pioneer USB — what Rekordbox *worked out*, not what the library contains. Needs no install and no database. **Read-only** | A USB path, or a `PIONEER/USBANLZ` directory | done |
 | | Beat grid | Every beat, plus grid BPM, first downbeat and whether the tempo varies | The `.DAT`/`.EXT` files beside each track | done — 3,655 of 3,665, incl. 119 files pyrekordbox rejects outright |
@@ -80,7 +80,7 @@ feature as a whole; the rows under it are its parts.
 | | Loudness | EBU R128 integrated loudness and loudness range, and the ReplayGain that implies, beside any ReplayGain the file carries | ffmpeg's `ebur128` | done |
 | | Peaks and clipping | True peak, sample peak, peak-to-loudness ratio, and the share of samples at or past full scale | The decoded audio | done |
 | | Integrity | Frames that fail to decode, files that decode to nothing, lengths that disagree with the header, stereo that is really mono or out of phase | The decoded audio | done |
-| | Rekordbox claims | Bitrate, sample rate, bit depth and length as the database records them, matched by path, or by name and size for a USB copy | The local `master.db`, or `--db-path` | partial — not from a USB's own export (`export.pdb`) yet, so a USB alone gets the file columns only |
+| | Rekordbox claims | Bitrate, sample rate, bit depth and length as the database records them, matched by path, or by name and size for a USB copy | The local `master.db`, or `--db-path`; else the USB's own `export.pdb` | done — a USB alone matches by path, 3,586 of the reference USB's 3,664 files; not in the browser build, which does not mount `export.pdb` |
 | | Report | One CSV row per file: each aspect measured, then claimed; then the issues found | `out/quality/quality_<folder>.csv` | done |
 | `playlist-diff` | *(the command)* | Lists the tracks of a Spotify playlist that a music folder does **not** have. **Read-only** on both sides | A playlist link or a CSV export of one, and a directory | done |
 | | Spotify API | Reads a playlist after a browser login (PKCE; no secret, read-only scopes) | A link, URI or ID; `--client-id` / `SELECTA_SPOTIFY_CLIENT_ID` | partial — **only playlists you own or collaborate on**, a Spotify-imposed limit since February 2026; the app owner needs Premium |
@@ -353,11 +353,12 @@ Reports go to `out/rekordbox/`; `--output-dir DIR` overrides that directory
 alone, without moving the other features' output.
 
 Data comes from, in order: a `master.db` you point at directly, then your
-**local** Rekordbox `master.db` — the only source carrying analyzed BPM and key,
-so it wins even when a USB is supplied, then scoped down to the tracks actually
-on the USB — and finally raw ID3 tags as a last resort. The exported
-`export.pdb` / `exportLibrary.db` on the USB are encrypted DeviceSQL and are
-skipped.
+**local** Rekordbox `master.db` — it wins even when a USB is supplied, then
+scoped down to the tracks actually on the USB — then the USB's own
+`export.pdb`, which carries the BPM and key Rekordbox exported with the tracks,
+so a USB on its own still has its analysis, and finally raw ID3 tags as a last
+resort. `export.pdb` is not encrypted and needs no extra; `exportLibrary.db`
+beside it is not read.
 
 Audio duplicate detection runs in two stages: a cheap prefilter grouping tracks
 by BPM, key and duration within tolerance, then a chromaprint comparison to
@@ -1032,9 +1033,10 @@ migrate: playlists, tags, cues, beat grids, USB export and PRO DJ LINK. Under
 its Tauri app is a set of independent Rust crates, and four of them do what
 this toolchain cannot do yet:
 
-- **`rbl-pdb`** reads and builds `export.pdb`, the DeviceSQL database that
-  pyrekordbox 0.4.4 cannot parse — the gap that leaves `quality`'s Rekordbox
-  columns blank for a USB on its own.
+- **`rbl-pdb`** reads and builds `export.pdb`, the DeviceSQL database
+  pyrekordbox cannot parse. selecta now reads it itself (`core/pdb.py`), and
+  this crate is the oracle its rows were checked against; building one is
+  what selecta cannot do.
 - **`rbl-onelibrary`** reads and builds `exportLibrary.db` (Device Library Plus
   / OneLibrary), a SQLCipher file. `core/sqlcipher.py` already decrypts
   SQLCipher 4; the missing piece is the passphrase derivation, which this crate
@@ -1066,8 +1068,8 @@ recommendation:
    fpcalc is, committed prebuilt as `wasm/prebuilt/` is. For the browser build
    it would be compiled to WebAssembly. That is plausible for `rbl-pdb`, which
    depends only on `thiserror` and `tracing`, and much harder for
-   `rbl-onelibrary`, which bundles SQLCipher and OpenSSL. Worth it only if a
-   Python reader for `export.pdb` stalls.
+   `rbl-onelibrary`, which bundles SQLCipher and OpenSSL. Reading
+   `export.pdb` no longer needs it: the Python reader exists.
 4. **Linked**, as a PyO3 extension inside the package. Not recommended; see the
    license below.
 

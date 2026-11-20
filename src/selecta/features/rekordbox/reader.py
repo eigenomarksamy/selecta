@@ -9,10 +9,13 @@ Source resolution order:
      when a USB is supplied. With --usb-path we then restrict the result to the
      tracks actually on the USB (matched by filename) and merge in any USB files
      missing from the local DB via their ID3 tags.
-  3. ID3 tags from the USB's Contents/ folder (last resort; no analyzed BPM/key).
+  3. The USB's own export.pdb (`core.pdb`), or one given as --db-path: the
+     analysis Rekordbox exported with the tracks, BPM and key included, for a
+     USB with no library behind it. USB files it has no row for are read from
+     their tags, as in 2.
+  4. ID3 tags from the USB's Contents/ folder (last resort; no analyzed BPM/key).
 
-The exported USB databases (export.pdb / exportLibrary.db) are DeviceSQL/
-encrypted and are not readable by the installed pyrekordbox, so they are skipped.
+exportLibrary.db, the newer database beside export.pdb, is not read.
 
 Returns plain `Track` dataclasses so the rest of the pipeline doesn't depend on
 pyrekordbox's ORM objects.
@@ -22,6 +25,7 @@ from __future__ import annotations
 import os
 from typing import Optional
 
+from selecta.core.pdb import EXPORT_PDB, PdbError, on_disk, read_tracks, usb_root
 from selecta.core.rekordbox_db import iter_content, open_database
 from selecta.core.tags import tracks_from_files
 from selecta.core.track import AUDIO_EXTS as _AUDIO_EXTS, Track, iter_audio_files
@@ -43,6 +47,10 @@ def load_tracks(db_path: str, *, usb_path: Optional[str] = None) -> list[Track]:
     db_path = os.path.normpath(db_path)
     usb_root = usb_path or os.path.dirname(os.path.dirname(db_path))
     contents_dir = os.path.normpath(os.path.join(usb_root, "Contents"))
+
+    # An export.pdb named by path: tier 3 with that file.
+    if db_path.lower().endswith(".pdb"):
+        return _load_pdb_tracks(db_path, usb_path)
 
     # 1. A master.db we can open directly (explicit --db-path or one on the USB).
     if db_path.endswith("master.db") and os.path.isfile(db_path):
@@ -73,7 +81,15 @@ def load_tracks(db_path: str, *, usb_path: Optional[str] = None) -> list[Track]:
         print("using local Rekordbox master.db (full library)")
         return local_tracks
 
-    # 3. Last resort: ID3 tags from the USB (no analyzed BPM/key available).
+    # 3. The USB's own export.pdb: its exported analysis, BPM and key included.
+    pdb_path = os.path.join(usb_root, EXPORT_PDB)
+    if usb_path and os.path.isfile(pdb_path):
+        try:
+            return _load_pdb_tracks(pdb_path, usb_path)
+        except (OSError, PdbError) as e:
+            print(f"export.pdb at {pdb_path} failed to load: {e}")
+
+    # 4. Last resort: ID3 tags from the USB (no analyzed BPM/key available).
     if os.path.isdir(contents_dir):
         print(f"falling back to ID3 tags from {contents_dir} (BPM/key will be sparse)")
         return _load_id3_tracks(contents_dir, usb_root)
@@ -105,6 +121,46 @@ def _load_v6_tracks(db_path: str, usb_path: Optional[str]) -> list[Track]:
                     duration_seconds=_duration_v6(row),
                 )
             )
+    return tracks
+
+
+def _load_pdb_tracks(pdb_path: str, usb_path: Optional[str]) -> list[Track]:
+    """Every audio file on the USB, with its export.pdb row's analysis where it has one.
+
+    Rows are matched to files by path, which is exact here: the database and
+    the files are the same USB's. The USB is `--usb-path`, or the one the file
+    sits on. Files without a row are read from their tags, as tier 2 does.
+    """
+    root = os.path.normpath(usb_path) if usb_path else usb_root(pdb_path)
+    by_path: dict[str, Track] = {}
+    for t in read_tracks(pdb_path):
+        if not t.file_path:
+            continue
+        file_path = on_disk(root, t.file_path)
+        by_path.setdefault(os.path.normcase(file_path), Track(
+            id=str(t.id),
+            title=t.title,
+            artist=t.artist,
+            file_path=file_path,
+            bpm=t.tempo_x100 / 100.0 if t.tempo_x100 else None,
+            key=t.key or None,
+            duration_seconds=float(t.duration_seconds) if t.duration_seconds else None,
+        ))
+
+    contents_dir = os.path.join(root, "Contents")
+    files_dir = contents_dir if os.path.isdir(contents_dir) else root
+    tracks: list[Track] = []
+    unmatched: list[str] = []
+    for path in iter_audio_files(files_dir):
+        track = by_path.get(os.path.normcase(path))
+        if track is not None:
+            tracks.append(track)
+        else:
+            unmatched.append(path)
+    print(f"using {pdb_path}: {len(tracks)} USB track(s) with exported analysis, "
+          f"{len(unmatched)} via ID3 only")
+    if unmatched:
+        tracks.extend(tracks_from_files(unmatched, start_idx=len(tracks), log=print))
     return tracks
 
 

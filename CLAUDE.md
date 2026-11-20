@@ -246,6 +246,9 @@ those flags can be typed after the subcommand: pass it straight through to
   0 means "not recorded" and is read as None. Those claims are not always right:
   54 rows of the local library list a ~130 kbps VBR mp3 as 32 kbps. Rows with
   no `FolderPath` are streaming entries and skipped. Read-only.
+  `load_export_files` makes the same `RekordboxFile`s from a USB's own
+  `export.pdb` (`pdb.py`), its `/Contents/...` paths made absolute under the
+  USB, with no pyrekordbox and nothing to decrypt.
   **`open_database` is a context manager, and works without sqlcipher3.** With
   it, pyrekordbox opens the file. Without it (always in the browser build, and
   on any platform sqlcipher3 has no wheel for) the file is decrypted into a
@@ -265,6 +268,25 @@ those flags can be typed after the subcommand: pass it straight through to
   `cryptography`:** the latter's Rust extension panics on import in Pyodide
   314, and Pyodide's stdlib has no `hashlib.pbkdf2_hmac` (no OpenSSL). The
   `rekordbox` extra carries it.
+- `pdb.py`: reads `export.pdb`, the DeviceSQL database a Pioneer USB carries
+  for the players, **with the stdlib alone**: it is not encrypted (only
+  `exportLibrary.db` beside it is, and that is not read). Fixed-size pages, each
+  one table's, rows in a heap from the front and their offsets in groups of 16
+  from the back. Tracks, and the artist, album, genre, key and label tables
+  their ids point into; nothing else. The layout is Deep Symmetry's published
+  analysis (Crate Digger), and **its rows equal rbxport's `rbl-pdb`'s** on the
+  reference USB: 3,587 tracks and all five named tables, every field in file
+  order (plan, F6). `rbl-pdb` is run as an oracle only, so no GPL code is here.
+  Load-bearing: rows are live by the group's **presence bits**, not the row
+  count (a deleted row keeps its offset); a table's first page is an index page
+  (flag 0x40) and holds no rows; a page chain is followed to the table's last
+  page, and a loop, a page out of range or another table's page is a
+  `PdbError`; strings are short ASCII, long ASCII (0x40) or UTF-16LE (0x90)
+  by their first byte (85 titles on the reference USB are the last).
+  `rbl-pdb` names string slot 15 `date_added`; it is Deep Symmetry's analysis
+  date (later than slot 10 on the 144 tracks analysed again), and both are
+  kept. `find_export_pdb` finds the USB a folder is on by walking up. 0.3 s
+  for the reference USB.
 - `tools.py`: running fpcalc, ffprobe and ffmpeg (`run`), so a front end can
   change how: `runner` is a subprocess by default and the browser build's
   WebAssembly otherwise (`selecta.browser._run_tool`). **stdout is streamed in
@@ -471,10 +493,13 @@ changed.
 **Read-only by design.** Never writes to the USB or the Rekordbox database;
 output goes only to `--output-dir` or `--export-csv`. Preserve this.
 
-- `reader.py`: three-tier source resolution: an explicit or USB `master.db`,
-  then the **local** Rekordbox `master.db` (the only source with analysed BPM
-  and key, so it is preferred even when a USB is given, then scoped to the USB
-  by filename via `_scope_to_usb`), then raw ID3 tags. **Tier 1 is scoped the
+- `reader.py`: four-tier source resolution: an explicit or USB `master.db`,
+  then the **local** Rekordbox `master.db` (preferred even when a USB is
+  given, then scoped to the USB by filename via `_scope_to_usb`), then the
+  USB's own `export.pdb` through `core/pdb.py` (the analysis exported with the
+  tracks, matched to the USB's files by path; files without a row are read
+  from their tags), then raw ID3 tags. An explicit `--db-path` to a `.pdb` is
+  the third tier with that file. **Tier 1 is scoped the
   same way when the explicit `master.db` is a library's rather than the USB's
   own** (no row points inside `--usb-path`), so `--db-path <local master.db>
   --usb-path D:/` matches tier 2 byte for byte. The browser build depends on
@@ -589,10 +614,18 @@ over `core.rekordbox_db.load_files`) and the measurement (`measure.py`);
   measured (no prefix), then `meta_` (the file's header and tags), then `rb_`;
   `issues` holds the flag kinds and `flags` the sentences, in the same order.
 
-The Rekordbox claims come from the **local** `master.db` (or `--db-path`); without
-it, or with `--no-rekordbox`, the `rb_` columns are blank and the run says why. A
-USB's own `export.pdb` is not read (pyrekordbox 0.4.4 cannot parse DeviceSQL), so
-a USB alone gets the file's own claims only (plan, F6).
+The Rekordbox claims come from the **local** `master.db` (or `--db-path`, which
+also takes an `export.pdb`). When none was named and the local one cannot be
+read, they come from the `export.pdb` of the USB being scanned
+(`core.pdb.find_export_pdb`), matched by path. The local library stays first so
+the baselines measured against it do not move. With neither, or with
+`--no-rekordbox`, the `rb_` columns are blank and the run says why. On the
+reference clone alone the USB's export matches 3,586 of 3,664 files by path;
+the other 78 have no row in it (plan, F6). That run, 54m46s, flags 533: the
+baseline's counts below except rekordbox bitrate, 120 (94 claimed at 32 kbps).
+The browser build does not mount
+`export.pdb` (its mount filter takes audio and `USBANLZ`), so there this
+fallback finds nothing.
 
 `--output-csv` requires a value here, while `rekordbox --export-csv` accepts the
 bare flag. That asymmetry is deliberate: this parser has a positional

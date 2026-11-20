@@ -17,7 +17,8 @@ def add_parser(subparsers, parents=()) -> argparse.ArgumentParser:
                     "export track metadata or report duplicate tracks.",
     )
     p.add_argument("--usb-path", help="Mount path of the Rekordbox USB (e.g. E:/)")
-    p.add_argument("--db-path", help="Direct path to master.db (overrides --usb-path)")
+    p.add_argument("--db-path", help="Direct path to master.db, or to a USB's "
+                                     "export.pdb (overrides --usb-path)")
     p.add_argument("--output-dir", default=None,
                    help="Write reports here instead of <out-dir>/rekordbox/.")
 

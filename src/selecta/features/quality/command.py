@@ -29,7 +29,8 @@ from typing import Callable, Iterable, Optional
 
 from selecta.core import tools
 from selecta.core.paths import resolve_output
-from selecta.core.rekordbox_db import RekordboxFile, load_files
+from selecta.core.pdb import PdbError, find_export_pdb
+from selecta.core.rekordbox_db import RekordboxFile, load_export_files, load_files
 from selecta.core.report import write_csv
 from selecta.core.tags import AudioHeader, read_audio_header, read_title_artist
 from selecta.core.track import iter_audio_files
@@ -115,7 +116,7 @@ def run(args: argparse.Namespace) -> int:
     if args.no_rekordbox:
         rb_index = None
     else:
-        rb_index = _load_rekordbox(args.db_path)
+        rb_index = _load_rekordbox(args.db_path, directory)
         if rb_index is None and args.db_path:
             return 1  # asked for by name, so not quietly skipped
 
@@ -173,19 +174,44 @@ def default_jobs() -> int:
     return max(1, min(8, (os.cpu_count() or 2) // 2))
 
 
-def _load_rekordbox(db_path: Optional[str]) -> Optional[RekordboxIndex]:
-    """The database's claims, or None — with a line saying why — if it cannot be read."""
+def _load_rekordbox(db_path: Optional[str], directory: str) -> Optional[RekordboxIndex]:
+    """The database's claims, or None — with a line saying why — if it cannot be read.
+
+    A `master.db` first: the one named, or the local library's. When no
+    database was named and the local one cannot be read, the `export.pdb` of
+    the USB `directory` is on, if it is on one: a USB on its own still carries
+    Rekordbox's claims about its files. The local library stays first because
+    the reports measured against it are the baselines.
+    """
+    if db_path and db_path.lower().endswith(".pdb"):
+        return _load_export(db_path)
     source = db_path or "the local Rekordbox library"
     try:
         rows = load_files(db_path, log=print)
     except ImportError as exc:
         # pyrekordbox, or pycryptodome where sqlcipher3 is missing too.
-        print(f'rekordbox: skipped - {exc.name or "pyrekordbox"} is not installed (pip install -e ".[rekordbox]")')
-        return None
+        reason = f'{exc.name or "pyrekordbox"} is not installed (pip install -e ".[rekordbox]")'
     except Exception as exc:
-        print(f"rekordbox: skipped - could not read {source}: {exc}")
+        reason = f"could not read {source}: {exc}"
+    else:
+        print(f"rekordbox: {len(rows)} file(s) recorded in {source}")
+        return RekordboxIndex(rows)
+
+    pdb = None if db_path else find_export_pdb(directory)
+    if pdb is None:
+        print(f"rekordbox: skipped - {reason}")
         return None
-    print(f"rekordbox: {len(rows)} file(s) recorded in {source}")
+    print(f"rekordbox: {reason}; reading the USB's own {pdb} instead")
+    return _load_export(pdb)
+
+
+def _load_export(pdb: str) -> Optional[RekordboxIndex]:
+    try:
+        rows = load_export_files(pdb)
+    except (OSError, PdbError) as exc:
+        print(f"rekordbox: skipped - could not read {pdb}: {exc}")
+        return None
+    print(f"rekordbox: {len(rows)} file(s) recorded in {pdb}")
     return RekordboxIndex(rows)
 
 

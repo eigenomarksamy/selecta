@@ -80,9 +80,9 @@ still open in each command:
 | --- | --- | --- | --- |
 | `catalog` | partial | The export reads `.mp3` only | None: the `.mp3`-only export is deferred ([Phase 1](#deferred-on-purpose)) |
 | `duplicates` | done | Nothing. Baseline: 158 groups from 3,664 files in 9m12s | — |
-| `rekordbox` | partial | Cannot read `export.pdb`. Artists are blank on a run from the local database alone | [F6](#f6). Blank artists have no ticket: attaching the USB fills them (CLAUDE.md) |
+| `rekordbox` | partial | Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6); its `exportLibrary.db` is not | None: attaching the USB fills the artists (CLAUDE.md) |
 | `analyze` | done | Cue points and waveforms are skipped on purpose | — |
-| `quality` | done | The Rekordbox columns are blank for a USB without the local library behind it, because `export.pdb` is unread | [F6](#f6) |
+| `quality` | done | Nothing natively: a USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6). The browser build does not mount that file, so there a USB alone still gets none | — |
 | `playlist-diff` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 | `playlist-export` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 
@@ -207,9 +207,9 @@ ticket in this phase needs another.
 
 ## Phase 1 — Known debt in what exists
 
-F5 was a small, local fix with a check that was already known, and is done. F6,
-an `export.pdb` reader, is the one sizeable piece of work: it fills the last gap
-shared by `quality` and `rekordbox`. Each ticket's check is its *done when*.
+F5 was a small, local fix with a check that was already known. F6, an
+`export.pdb` reader, filled the last gap shared by `quality` and `rekordbox`.
+Both are done. Each ticket's check is its *done when*.
 
 <a id="f5"></a>
 ### F5 · fpcalc cannot fingerprint a file whose name contains a lone surrogate · *done*
@@ -228,7 +228,7 @@ shared by `quality` and `rekordbox`. Each ticket's check is its *done when*.
   ([log](#log)).
 
 <a id="f6"></a>
-### F6 · `export.pdb` is unread · l
+### F6 · `export.pdb` is unread · *done*
 
 - **Where:** a new reader in `core`.
 - **Change:** a Python reader for the DeviceSQL tables `quality` and
@@ -240,6 +240,12 @@ shared by `quality` and `rekordbox`. Each ticket's check is its *done when*.
   columns. Today that run matches 0 rows, against 3,069 of 3,664 with the local
   library.
 - **Needs:** nothing. **After:** F5.
+- **Result:** `export.pdb` is not encrypted, so `core/pdb.py` reads it with
+  the stdlib alone. Its rows equal `rbl-pdb`'s on the reference USB, built at
+  rbxport `d0ff75b` (1.10.0): 3,587 tracks and the genres, artists, albums,
+  labels and keys tables, every field in file order. `quality` on the USB
+  alone now matches 3,586 of 3,664 files by path, and `rekordbox` reads the
+  USB's exported BPM and key ([log](#log)).
 
 <a id="f7"></a>
 ### F7 · The ffmpeg tool still carries the old prefix · *done*
@@ -774,6 +780,29 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-20 · F6** · Done. `export.pdb` is plain DeviceSQL, not encrypted
+  as the README said, so `core/pdb.py` reads it with the stdlib, from Deep
+  Symmetry's published layout. The oracle is rbxport at `d0ff75b` (1.10.0,
+  2026-11-07), cloned and built in WSL outside the tree with its pinned Rust
+  1.99.0: a small crate over `rbl-pdb` prints every row as JSON. On the
+  reference USB the two readers agree on 3,587 tracks, 141 genres, 3,393
+  artists, 3,081 albums, 1,432 labels and 24 keys, 91,469 cells in file order,
+  including 85 titles in UTF-16. The one disagreement was a name:
+  `rbl-pdb`'s `date_added` is string slot 15, Deep Symmetry's analysis date,
+  later than slot 10 on the 144 tracks analysed again, and both are kept. A
+  file that is not a PDB, a truncated one, a looping or foreign page chain and
+  an out-of-range string each raise `PdbError`. `quality` on the clone alone,
+  with no local library readable: 54m46s, 3,663 of 3,664 measured (the same
+  undecodable AIFF), **3,586 matched by path** (it matched 0 before); the 78
+  others have no row in the export. Flagged 533: rekordbox bitrate 120 (94 of
+  them claimed at 32 kbps, the VBR pattern the local library shows), and the
+  other kinds exactly the baseline's. On 100 files the report differs from
+  `HEAD` only in the `rb_` columns and in two rekordbox bitrate flags. The
+  local library stays the first source, so its baseline cannot move.
+  `rekordbox --usb-path` on the clone alone now has BPM on 3,617 of 3,664
+  tracks, against 1,814 from tags, and the same `tracks.csv` through
+  `--db-path export.pdb`. Not done here: the browser build does not mount
+  `export.pdb`, and `exportLibrary.db` is not read.
 - **2026-11-20 · plan** · W2 added, at the owner's request: the quality view
   names its issues but never explains them. The explanations go on each issue,
   shown on hover and on focus, and in a table on the page. An info page of
