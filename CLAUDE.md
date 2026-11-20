@@ -629,9 +629,9 @@ the baselines measured against it do not move. With neither, or with
 reference clone alone the USB's export matches 3,586 of 3,664 files by path;
 the other 78 have no row in it (plan, F6). That run, 54m46s, flags 533: the
 baseline's counts below except rekordbox bitrate, 120 (94 claimed at 32 kbps).
-The browser build does not mount
-`export.pdb` (its mount filter takes audio and `USBANLZ`), so there this
-fallback finds nothing (plan, F9).
+The browser build mounts a picked USB's
+`export.pdb` for this, and there, with no `master.db` picked, `--limit 100`
+matches 100 of 100 by path, with `rb_` columns identical to native (plan, F9).
 
 `--output-csv` requires a value here, while `rekordbox --export-csv` accepts the
 bare flag. That asymmetry is deliberate: this parser has a positional
@@ -905,10 +905,13 @@ What is load-bearing:
   spurious `coverage`). numpy and packaging are Pyodide's own builds. No
   micropip: `loadPackage` installs wheel URLs.
 - **The mount filter** (`src/browser/files.ts`). Only audio (`AUDIO_EXTS`,
-  AppleDouble stubs included, since the catalog export counts them) and anything
-  under `USBANLZ` is mounted: 14,851 of 29,593 files on the reference USB, the
-  rest being `PIONEER/Artwork`. The rules come from `browser.boot`, that is from
-  `core.track` and `core.anlz`, so they cannot drift.
+  AppleDouble stubs included, since the catalog export counts them), anything
+  under `USBANLZ`, and the USB's `PIONEER/rekordbox/export.pdb` are mounted:
+  14,852 of 29,593 files on the reference USB, the rest being mostly
+  `PIONEER/Artwork`. The rules come from `browser.boot`, that is from
+  `core.track`, `core.anlz` and `core.pdb`, so they cannot drift. The
+  `export.pdb` is what `quality` and `rekordbox` fall back to in a tab, where
+  no local library exists (plan, F9).
 - **NTFS order in `readdir`.** The catalog export writes rows in `os.walk` order,
   so matching a Windows run byte for byte needs NTFS's listing order (each UTF-16
   unit uppercased, compared unit by unit). Sorting files before mounting cannot

@@ -4,16 +4,19 @@ import type { MountRules } from "./protocol";
 /**
  * Whether a picked file is one a command reads: audio by extension (all of
  * them, AppleDouble `._` stubs too, because the catalog export counts those),
- * or anything under the Rekordbox analysis folder. `path` starts with the
- * picked folder's own name, so picking `USBANLZ` itself keeps its contents.
+ * anything under the Rekordbox analysis folder, or the USB's `export.pdb`,
+ * which `quality` and `rekordbox` read when no master.db is picked. `path`
+ * starts with the picked folder's own name, so picking `USBANLZ` itself keeps
+ * its contents, and picking `PIONEER` keeps `rekordbox/export.pdb`.
  *
- * On the reference USB this drops 14,728 of 29,593 files — the artwork JPGs
- * under PIONEER/Artwork — and every one dropped is a File the browser no
+ * On the reference USB this drops 14,741 of 29,593 files — mostly the artwork
+ * JPGs under PIONEER/Artwork — and every one dropped is a File the browser no
  * longer has to hand to the worker.
  */
 export function keepForMount(path: string, rules: MountRules): boolean {
   const lower = path.toLowerCase();
   if (rules.audio_exts.some((ext) => lower.endsWith(ext))) return true;
+  if (`/${lower}`.endsWith(`/${rules.export_pdb.toLowerCase()}`)) return true;
   const dir = rules.analysis_dir.toLowerCase();
   const parts = lower.split("/");
   return parts.slice(0, -1).includes(dir);

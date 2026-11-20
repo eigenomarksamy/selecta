@@ -25,6 +25,8 @@ export interface Manifest {
 export interface MountRules {
   audio_exts: string[];
   analysis_dir: string;
+  /** The USB's database, relative to the USB's root: `PIONEER/rekordbox/export.pdb`. */
+  export_pdb: string;
 }
 
 export interface BootInfo {

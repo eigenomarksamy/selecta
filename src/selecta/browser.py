@@ -178,6 +178,7 @@ def boot(with_tools: bool = True) -> dict:
     from selecta import __version__, cli  # noqa: F401 - imports every add_parser
     from selecta.core import paths, spotify, tools
     from selecta.core.anlz import USBANLZ_SUBDIR
+    from selecta.core.pdb import EXPORT_PDB
     from selecta.core.track import AUDIO_EXTS
 
     paths.configure(OUT_ROOT, TMP_ROOT)
@@ -202,6 +203,9 @@ def boot(with_tools: bool = True) -> dict:
         "mount": {
             "audio_exts": list(AUDIO_EXTS),
             "analysis_dir": USBANLZ_SUBDIR.replace(os.sep, "/").rsplit("/", 1)[-1],
+            # The USB's own database, which `quality` and `rekordbox` fall
+            # back to when no master.db can be read, as in a tab (plan, F9).
+            "export_pdb": EXPORT_PDB.replace(os.sep, "/"),
         },
         "commands": commands(),
         # Named on the page, so it can say what needs selecta on a real machine.

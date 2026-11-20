@@ -80,7 +80,7 @@ feature as a whole; the rows under it are its parts.
 | | Loudness | EBU R128 integrated loudness and loudness range, and the ReplayGain that implies, beside any ReplayGain the file carries | ffmpeg's `ebur128` | done |
 | | Peaks and clipping | True peak, sample peak, peak-to-loudness ratio, and the share of samples at or past full scale | The decoded audio | done |
 | | Integrity | Frames that fail to decode, files that decode to nothing, lengths that disagree with the header, stereo that is really mono or out of phase | The decoded audio | done |
-| | Rekordbox claims | Bitrate, sample rate, bit depth and length as the database records them, matched by path, or by name and size for a USB copy | The local `master.db`, or `--db-path`; else the USB's own `export.pdb` | done — a USB alone matches by path, 3,586 of the reference USB's 3,664 files; not in the browser build, which does not mount `export.pdb` |
+| | Rekordbox claims | Bitrate, sample rate, bit depth and length as the database records them, matched by path, or by name and size for a USB copy | The local `master.db`, or `--db-path`; else the USB's own `export.pdb` | done — a USB alone matches by path, 3,586 of the reference USB's 3,664 files, in the browser build too |
 | | Report | One CSV row per file: each aspect measured, then claimed; then the issues found | `out/quality/quality_<folder>.csv` | done |
 | `playlist-diff` | *(the command)* | Lists the tracks of a Spotify playlist that a music folder does **not** have. **Read-only** on both sides | A playlist link or a CSV export of one, and a directory | done |
 | | Spotify API | Reads a playlist after a browser login (PKCE; no secret, read-only scopes) | A link, URI or ID; `--client-id` / `SELECTA_SPOTIFY_CLIENT_ID` | partial — **only playlists you own or collaborate on**, a Spotify-imposed limit since February 2026; the app owner needs Premium |
@@ -846,9 +846,11 @@ refuses a folder, *use the other picker* under the button switches to that
 input. Either way the browser lists the whole folder first, which for a large
 USB takes it ~10 seconds before the page can show progress.
 
-Only what a command reads is handed to Python: audio files, and the Rekordbox
-analysis folder (`PIONEER/USBANLZ`). On the reference USB that is 14,851 of
-29,593 files — the rest is artwork.
+Only what a command reads is handed to Python: audio files, the Rekordbox
+analysis folder (`PIONEER/USBANLZ`), and the USB's own database
+(`PIONEER/rekordbox/export.pdb`), so `quality` and `rekordbox` have Rekordbox's
+data for a USB without picking a `master.db`. On the reference USB that is
+14,852 of 29,593 files — the rest is mostly artwork.
 
 ### How fast
 

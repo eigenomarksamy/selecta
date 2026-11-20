@@ -80,9 +80,9 @@ still open in each command:
 | --- | --- | --- | --- |
 | `catalog` | partial | The export reads `.mp3` only | None: the `.mp3`-only export is deferred ([Phase 1](#deferred-on-purpose)) |
 | `duplicates` | done | Nothing. Baseline: 158 groups from 3,664 files in 9m12s | — |
-| `rekordbox` | partial | Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6), but not in the browser build; its `exportLibrary.db` is not read | [F9](#f9). Blank artists have no ticket: attaching the USB fills them (CLAUDE.md) |
+| `rekordbox` | partial | Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6), in the browser build too since [F9](#f9); its `exportLibrary.db` is not read | None: attaching the USB fills the artists (CLAUDE.md) |
 | `analyze` | done | Cue points and waveforms are skipped on purpose | — |
-| `quality` | done | A USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6), but not in the browser build, which does not mount that file | [F9](#f9) |
+| `quality` | done | Nothing. A USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6), in the browser build too since [F9](#f9) | — |
 | `playlist-diff` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 | `playlist-export` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 
@@ -210,7 +210,7 @@ ticket in this phase needs another.
 F5 was a small, local fix with a check that was already known. F6, an
 `export.pdb` reader, filled the last gap shared by `quality` and `rekordbox`.
 Both are done. F8 and F9 are two bugs F6's work found, added on 2026-11-20,
-and F8 is done.
+and both are done too.
 Each ticket's check is its *done when*.
 
 <a id="f5"></a>
@@ -296,7 +296,7 @@ Each ticket's check is its *done when*.
   ([log](#log)).
 
 <a id="f9"></a>
-### F9 · The browser build does not mount `export.pdb` · s
+### F9 · The browser build does not mount `export.pdb` · *done*
 
 - **Where:** the mount filter, `frontend/src/browser/files.ts`, and the rules
   `selecta.browser.boot` gives it.
@@ -312,6 +312,11 @@ Each ticket's check is its *done when*.
   and `rekordbox --export-csv` is byte-identical to native once paths are
   mapped.
 - **Needs:** nothing. F6 is done.
+- **Result:** `browser.boot`'s mount rules carry `core.pdb.EXPORT_PDB`, and
+  the filter mounts it beside the audio and `USBANLZ`. In headless Edge with
+  the CSP enforced and no `master.db` picked, `quality --limit 100` matches
+  100 of 100 files by path, and `rekordbox --export-csv` is byte-identical to
+  native ([log](#log)).
 
 ### Deferred on purpose
 
@@ -827,6 +832,21 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-20 · F9** · Done. `browser.boot`'s mount rules gain
+  `export_pdb`, from `core.pdb.EXPORT_PDB`, and `keepForMount` keeps that file,
+  whichever folder above it is picked. The reference USB now mounts 14,852 of
+  its 29,593 files, one more than before. Checked in headless Edge through
+  `puppeteer-core` against `wrangler dev`, with the CSP and isolation
+  enforced, the USB picked through *use the other picker* and no `master.db`
+  picked. `rekordbox --usb-path --export-csv`: 5 s, "3586 USB track(s) with
+  exported analysis, 78 via ID3 only", as native, and its `tracks.csv` is
+  byte-identical to native's from the same export (189,143 bytes).
+  `quality --limit 100`: 7m15s, 100 of 100 matched by path. Against native's
+  run on the same export, with paths mapped, every `rb_` column and every
+  issue is identical, and only `clipped_samples` moves, by 1–4 in 11 rows,
+  the MP3 decoding difference already recorded for the browser build. Zero
+  console errors. The driver is not in the tree, as for the earlier checks
+  ([H1](#h1)'s browser tier will commit one).
 - **2026-11-20 · F8** · Done. The `rekordbox` and `analyze` extras are
   bounded `pyrekordbox>=0.4.0,<0.5`, the same line as the browser build's 0.4.4
   pin. A fresh venv's `pip install -e ".[all]"` installs pyrekordbox 0.4.4 and
