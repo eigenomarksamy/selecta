@@ -724,11 +724,13 @@ used as given). Columns, with Exportify's names:
 
 `Track URI`, `Track Name`, `Artist Name(s)`, `Album Name`,
 `Album Artist Name(s)`, `Album Release Date`, `Disc Number`, `Track Number`,
-`Track Duration (ms)`, `Explicit`, `ISRC`, `Added By`, `Added At`,
+`Track Duration`, `Explicit`, `ISRC`, `Added By`, `Added At`,
 `Playlist Name`
 
 - Several artists are joined with a comma and a space — readable in a
   spreadsheet.
+- `Track Duration` is `m:ss`, or `h:mm:ss` past an hour, where Exportify writes
+  milliseconds. `playlist-diff` reads both.
 - The file carries a UTF-8 byte-order mark so Excel shows accented names
   correctly instead of `SÃºcubo`.
 - Local files added to the playlist in the Spotify app are included, with a

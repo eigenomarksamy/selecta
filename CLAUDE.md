@@ -372,7 +372,9 @@ those flags can be typed after the subcommand: pass it straight through to
   and the playlist CSV format **in both directions**: `read_playlist_csv`
   (lenient: columns found by alias, only title and artist required, because
   exporters disagree on header names) and `write_playlist_csv` (fixed:
-  Exportify's column names plus `Playlist Name`). **They share a file so they
+  Exportify's column names plus `Playlist Name`, except `Track Duration`, a
+  clock where Exportify writes milliseconds; the reader parses that column only
+  as m:ss or h:mm:ss). **They share a file so they
   cannot drift:** an export must read back into `playlist-diff`, and every
   column the reader uses is spelled as one of its aliases. Track references are
   held as Spotify URIs and turned into links on demand (`url`). Export-only

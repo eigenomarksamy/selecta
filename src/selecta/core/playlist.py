@@ -13,7 +13,8 @@ Reading is lenient and writing is fixed. Exporters (Exportify, TuneMyMusic,
 Soundiiz) disagree on header names and none publishes a spec, so
 `read_playlist_csv` finds columns by alias, case-insensitively, and insists only
 on a title and an artist column. `write_playlist_csv` uses Exportify's column
-names, and every column the reader uses is spelled as one of its aliases.
+names but writes the duration as a clock, and every column the reader uses is
+spelled as one of its aliases.
 
 Every track reference is held as a Spotify URI and turned into a link on
 demand, so a URI, a bare ID or an open.spotify.com link in a CSV all land the
@@ -46,6 +47,9 @@ CSV_COLUMNS = {
     # Only columns that say they are milliseconds. A bare "duration" could be
     # seconds or m:ss depending on the tool, and a wrong unit is worse than none.
     "duration_ms": ("track duration (ms)", "duration (ms)", "duration_ms"),
+    # `write_playlist_csv`'s own column, m:ss or h:mm:ss. Read only as a clock
+    # (`_clock_ms`), so a bare number under this name is dropped, not guessed at.
+    "duration_clock": ("track duration",),
     "isrc": ("isrc",),
     "uri": ("track uri", "spotify - id", "spotify id", "spotify url", "spotify uri", "uri", "url"),
     "playlist": ("playlist name", "playlist"),
@@ -143,6 +147,27 @@ def _int_or_none(value: str) -> Optional[int]:
         return None
 
 
+_CLOCK = re.compile(r"(?:(\d+):)?(\d{1,2}):(\d{2})")
+
+
+def format_clock(ms: Optional[int]) -> str:
+    """6:05, or 1:02:13 past an hour, rounded to the second. Empty for None."""
+    if ms is None:
+        return ""
+    hours, rest = divmod(round(ms / 1000), 3600)
+    minutes, seconds = divmod(rest, 60)
+    return f"{hours}:{minutes:02d}:{seconds:02d}" if hours else f"{minutes}:{seconds:02d}"
+
+
+def _clock_ms(value: str) -> Optional[int]:
+    """`format_clock`'s inverse, in milliseconds. None for anything that is not m:ss or h:mm:ss."""
+    match = _CLOCK.fullmatch(value)
+    if not match or int(match[3]) > 59 or (match[1] and int(match[2]) > 59):
+        return None
+    hours, minutes, seconds = (int(part or 0) for part in match.groups())
+    return ((hours * 60 + minutes) * 60 + seconds) * 1000
+
+
 def read_playlist_csv(path: str) -> Playlist:
     """Read a playlist exported to CSV. Raises `PlaylistSourceError` if it has no title/artist columns."""
     # utf-8-sig: Excel-friendly exports start with a byte-order mark, which
@@ -181,7 +206,9 @@ def read_playlist_csv(path: str) -> Playlist:
                 title=title,
                 artists=_split_artists(cell(row, "artist")),
                 album=cell(row, "album"),
-                duration_ms=_int_or_none(cell(row, "duration_ms")),
+                duration_ms=(_int_or_none(cell(row, "duration_ms"))
+                             if "duration_ms" in columns
+                             else _clock_ms(cell(row, "duration_clock"))),
                 isrc=cell(row, "isrc"),
                 uri=uri,
                 is_local=uri.startswith("spotify:local:"),
@@ -199,6 +226,8 @@ def _text(value) -> str:
 #: file reads like one of its exports, plus "Playlist Name" so a CSV read back
 #: keeps the playlist's real name rather than its filename. Artists are joined
 #: with ", ": readable in a spreadsheet, and the reader splits on commas anyway.
+#: The one departure is the duration: "Track Duration" as m:ss or h:mm:ss, for
+#: a person reading the file, where Exportify writes milliseconds.
 EXPORT_COLUMNS: tuple[tuple[str, Callable[[PlaylistTrack], str]], ...] = (
     ("Track URI", lambda t: t.uri),
     ("Track Name", lambda t: t.title),
@@ -208,7 +237,7 @@ EXPORT_COLUMNS: tuple[tuple[str, Callable[[PlaylistTrack], str]], ...] = (
     ("Album Release Date", lambda t: t.release_date),
     ("Disc Number", lambda t: _text(t.disc_number)),
     ("Track Number", lambda t: _text(t.track_number)),
-    ("Track Duration (ms)", lambda t: _text(t.duration_ms)),
+    ("Track Duration", lambda t: format_clock(t.duration_ms)),
     ("Explicit", lambda t: "" if t.explicit is None else str(t.explicit).lower()),
     ("ISRC", lambda t: t.isrc),
     ("Added By", lambda t: t.added_by),
