@@ -27,6 +27,7 @@ does.
 | G | Phase 5: genre enrichment. G0 comes before Phases 5 and 6 |
 | R | Phase 6: `dig`, records not yet in the library |
 | X | Phase 7: export to Traktor and Serato |
+| C | Outside the phases: `convert`, new audio files made from the library's |
 | W | Outside the phases: small changes to the page |
 | DOC | Outside the phases: the product's documents, vision, architecture, design, testing strategy, and verification and validation |
 | SCM | Outside the phases: source control and delivery, CI, branching, protection, releases and versioning |
@@ -59,8 +60,8 @@ work found.
 
 **Priority.** The dependency diagram puts the phases in three columns, which
 map onto the Project's priorities: Phases 0 and 1 (*now*) are P1, Phases 2 and
-3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W1, W2, DOC1 and
-SCM1 are P2. A priority set in the Project overrides this.
+3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W1–W4, C1, DOC1
+and SCM1 are P2, and C2 is P3. A priority set in the Project overrides this.
 
 **Adding work.** A new ticket takes the next number in its lane. A split ticket
 keeps its number and adds a letter (F6a, F6b). A new lane takes a prefix no
@@ -632,7 +633,9 @@ Every ticket in this phase needs [H1](#h1).
 
 ## Outside the phases
 
-Two small changes need none of the phases, so either can land at any time.
+These need none of the phases, so any of them can land at any time: W1–W4,
+small changes to the page, and the C lane, a new command that makes MP3s from
+lossless files.
 
 <a id="w1"></a>
 ### W1 · A button back to eigenomar.com · xs
@@ -682,6 +685,127 @@ Two small changes need none of the phases, so either can land at any time.
   table opens and closes by keyboard. `npm run build` in `frontend/` passes,
   and the browser CSP is unchanged.
 - **Needs:** nothing.
+
+<a id="w3"></a>
+### W3 · Copy a playlist export as a list of tracks · s
+
+- **Change:** a `playlist-export` CSV opens in the page's generic table view
+  today (`viewFor` in `frontend/src/pages/ReportPage.tsx`), with no way to
+  take its tracks anywhere but as a file. Give a CSV in a `playlist-export`
+  folder a view of its own: the same table, under a bar with a *Copy as list*
+  button and a switch between *Artist - Track* and *Track - Artist*. The
+  button copies one line per row, in the CSV's order, written
+  `<Artist Name(s)> - <Track Name>` or the other way round, with the two
+  joined by a plain hyphen between spaces and the artists as the CSV writes
+  them, joined by commas. It uses `CopyButton`, so it says *Copied* the way the other copy
+  buttons do. `store` keeps the switch's position, so the page remembers it.
+  Nothing changes in Python: the CSV is already in the page, and a link or
+  a clipboard write adds no origin, so the browser CSP stays closed.
+- **Done when:** in `selecta web` and on selecta.eigenomar.com, with a
+  `playlist-export` report open, the button copies as many lines as the
+  table has rows, in the same order and the order the switch shows. A title
+  that already holds a spaced hyphen, such as `Track - Original Mix`, and a track with
+  two artists are copied unchanged. The switch keeps its position after a
+  reload, and both work by keyboard. Any other CSV still opens in the plain
+  table. `npm run build` in `frontend/` passes, and the browser CSP is
+  unchanged.
+- **Needs:** nothing.
+
+<a id="w4"></a>
+### W4 · The ecosystem's tab icon · xs
+
+- **Change:** every app under eigenomar.com shows the same tab icon:
+  eigenomar.com's lambda with its two colors swapped, a light-blue tile and
+  a near-black lambda (shared decision SD5). Replace
+  `frontend/public/favicon.svg`, the record, with it. `index.html` already
+  links that file, and both `selecta web` and `build_browser.py` serve it
+  from the page's build, so nothing else changes.
+- **Done when:** the tab shows the icon on selecta.eigenomar.com and in
+  `selecta web`, in a light and a dark browser theme. `npm run build` in
+  `frontend/` passes, and the browser CSP is unchanged.
+- **Needs:** nothing.
+
+### The C lane: `convert`
+
+`selecta convert` makes a 320 kbps MP3 of each lossless file in a folder,
+into a second folder that mirrors the first. It is a writer, so it is a
+command of its own, but it writes no library data and never opens a source
+file for writing: *nothing in selecta modifies an audio file* stays true. That
+is why it needs neither the harness ([H1](#h1)) nor a backup, which guard
+the writers that change `master.db`. Only lossless sources are read. A lossy
+file converted again is the transcode `quality` exists to catch, so MP3, AAC,
+OGG and Opus inputs are never offered.
+
+<a id="c1"></a>
+### C1 · `selecta convert`: FLAC to 320 kbps MP3 · m
+
+- **Change:** a new feature, `features/convert/`, registered in `cli.FEATURES`:
+  `selecta convert <directory> <destination>`. It takes the `.flac` files
+  from `core.track.iter_audio_files`, the one directory walk, and counts
+  every other file without reading it. Each FLAC is
+  encoded by native ffmpeg, run through `core.tools`, with
+  `-c:a libmp3lame -b:a 320k`, its tags written as ID3v2.3, which every
+  Rekordbox version reads (`-map_metadata 0 -id3v2_version 3`), and its
+  embedded cover, if any, kept as the front cover. MP3 stops at 48 kHz, so
+  88.2 and 176.4 kHz become 44.1 kHz, and 96 and 192 kHz become 48 kHz.
+  - **Where it writes:** `destination/<the file's path under directory>.mp3`,
+    creating the folders. It refuses a `destination` inside `directory`, or
+    the other way round, so the library never fills up with MP3s and a run
+    never reads its own output.
+  - **What it never does:** overwrite. An MP3 already at the path is skipped,
+    so a second run converts only what is new. It writes to a temporary
+    name beside the target and renames it only once ffmpeg succeeds, so a
+    cancelled or crashed run leaves no half-written MP3 to be skipped next
+    time.
+  - **Before it starts:** it checks once that the ffmpeg it found has the
+    `libmp3lame` encoder, and if not, exits saying so and how to get one,
+    before writing anything.
+  - **Its report:** `out/convert/convert_<folder>.csv` through
+    `resolve_output`, one row per FLAC: source, output, `converted`,
+    `skipped: exists` or `failed:` with ffmpeg's last line, the sample rate
+    in and out, and the time taken. The summary counts each. Any failure
+    exits 1, as `catalog`'s failed audit does (D3).
+  - **`--jobs`,** as `quality` has it, runs that many ffmpegs at once, and
+    cancelling kills those in flight, as `quality`'s are.
+  - **Front ends:** `selecta web` offers it from the parser, as it does every
+    command. `web/schema.py` gives `destination` a folder hint in
+    `PATH_HINTS`. The browser build leaves it out: its ffmpeg is built
+    without an encoder, and a tab cannot write a folder, so it stays out of
+    `selecta.browser`'s `ONLINE_COMMANDS`, and no feature checks where it
+    runs.
+  - **Documents:** the README's command table gets `convert` and its
+    output, and `CLAUDE.md` its layout row and a `convert` section with the
+    measured baseline, as the other features have.
+- **Done when:** a measured run on the reference clone's FLAC files, with the
+  count stated, writes one MP3 for each at its mirrored path, and a name with
+  Cyrillic or Korean letters converts like any other. ffprobe reads each as
+  MP3, constant 320 kbps, at 44.1 or 48 kHz. `core.tags`'s readers find the same
+  title, artist, album, track number, date and genre from the MP3 as from
+  its FLAC, wherever the FLAC has them, and a FLAC with a cover gives an MP3
+  with one. `selecta quality` on `destination` flags no `transcode?` on any
+  of them. A second run converts nothing and reports every file skipped. A
+  run cancelled in `selecta web` part-way leaves no MP3 that ffmpeg did not
+  finish. A hash of every file under `directory` is the same before and
+  after. A `destination` inside `directory` and an ffmpeg without
+  `libmp3lame` each exit with their message and write nothing. The browser
+  build doesn't list `convert`. `selecta --help` works with no extras
+  installed, and the README and `CLAUDE.md` say what it does.
+- **Needs:** nothing.
+
+<a id="c2"></a>
+### C2 · `convert` reads WAV, AIFF and ALAC · s
+
+- **Change:** the rest of the lossless formats `AUDIO_EXTS` holds, `.wav`,
+  `.aiff`/`.aif` and ALAC in `.m4a`, go through C1's encoder. An `.m4a` is
+  converted only when ffprobe says its codec is ALAC, since AAC shares the
+  extension, and an AAC is counted as lossy and left alone. AIFF's and
+  ALAC's tags are kept as FLAC's are. A WAV usually has none, so its MP3
+  gets a title from the filename only when the WAV has no title of its own,
+  and the report says which files it did that for.
+- **Done when:** a measured run on the reference clone's WAV, AIFF and M4A
+  files meets C1's checks for each format it converts, and its report counts
+  each AAC as skipped, lossy.
+- **Needs:** [C1](#c1).
 
 ## Ecosystem standards
 
@@ -755,8 +879,8 @@ flowchart LR
 The top row leads to the writers and the bottom row to the network features.
 The two tracks are independent, so they can be worked in parallel, and there is
 no arrow between them. No phase has a date yet. The gates in the decisions
-table below sit inside the phases, not between the boxes. W1, W2, DOC1 and SCM1
-are outside both tracks. An arrow is a hard need only for the tickets of its phase
+table below sit inside the phases, not between the boxes. W1–W4, C1, C2, DOC1
+and SCM1 are outside both tracks. An arrow is a hard need only for the tickets of its phase
 that use what it carries ([How this plan works](#how-this-plan-works)).
 
 ## Open decisions
@@ -832,6 +956,13 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-20 · W3, W4, C1, C2** · Added, from the developer's ideas. W3
+  copies a `playlist-export` report as a list of `artist - track` lines, on
+  the page only. W4 takes the ecosystem's tab icon (shared decision SD5),
+  which replaces the record. The C lane is new: `convert` writes 320 kbps MP3s
+  of lossless files into a mirrored folder that must be named, FLAC first
+  (C1), then WAV, AIFF and ALAC (C2). It is left out of the browser build,
+  whose ffmpeg has no encoder.
 - **2026-11-20 · F9** · Done. `browser.boot`'s mount rules gain
   `export_pdb`, from `core.pdb.EXPORT_PDB`, and `keepForMount` keeps that file,
   whichever folder above it is picked. The reference USB now mounts 14,852 of
