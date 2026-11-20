@@ -246,6 +246,12 @@ those flags can be typed after the subcommand: pass it straight through to
   0 means "not recorded" and is read as None. Those claims are not always right:
   54 rows of the local library list a ~130 kbps VBR mp3 as 32 kbps. Rows with
   no `FolderPath` are streaming entries and skipped. Read-only.
+  **pyrekordbox is bounded below 0.5** (`pyproject.toml`): 0.5.0 replaced
+  `pyrekordbox.db6`, which `open_database` uses, with `masterdb`, and the
+  browser build pins 0.4.4. With 0.5 installed anyway, `open_database` raises
+  `UnsupportedPyrekordbox`, which names the installed version. It is a
+  `RuntimeError`, not an `ImportError`, because callers read an `ImportError`
+  as "not installed" (plan, F8).
   `load_export_files` makes the same `RekordboxFile`s from a USB's own
   `export.pdb` (`pdb.py`), its `/Contents/...` paths made absolute under the
   USB, with no pyrekordbox and nothing to decrypt.

@@ -54,6 +54,7 @@ def open_database(db_path: Optional[str] = None, *, log: Optional[Callable[[str]
     copy under `tmp/`, pyrekordbox opens that with `unlock=False`, and the copy
     is deleted when the block exits. The rows are the same either way.
     """
+    _require_supported_pyrekordbox()
     from pyrekordbox.db6.database import Rekordbox6Database
 
     if _have_sqlcipher():
@@ -88,6 +89,38 @@ def open_database(db_path: Optional[str] = None, *, log: Optional[Callable[[str]
         finally:
             db.close()
             db.engine.dispose()  # or Windows refuses to delete the copy
+
+
+class UnsupportedPyrekordbox(RuntimeError):
+    """pyrekordbox is installed, but at a version without the database layer used here.
+
+    Not an `ImportError`, deliberately: callers read that as "not installed"
+    and say so, which sends someone to install what they already have.
+    """
+
+
+def _require_supported_pyrekordbox() -> None:
+    """Raise `UnsupportedPyrekordbox` when the installed pyrekordbox has no `db6`.
+
+    0.5.0 moved the database layer to `pyrekordbox.masterdb`, and the extras
+    are bounded below 0.5 for it (pyproject.toml). A pyrekordbox that is not
+    installed at all, or a dependency it cannot import, raises as before.
+    """
+    try:
+        import pyrekordbox.db6.database  # noqa: F401
+    except ModuleNotFoundError as exc:
+        if not (exc.name or "").startswith("pyrekordbox."):
+            raise
+        from importlib.metadata import PackageNotFoundError, version
+
+        try:
+            installed = version("pyrekordbox")
+        except PackageNotFoundError:
+            installed = "unknown"
+        raise UnsupportedPyrekordbox(
+            f"pyrekordbox {installed} is installed, but selecta reads master.db "
+            f'with pyrekordbox 0.4 (pip install -e ".[rekordbox]" installs it)'
+        ) from exc
 
 
 def _have_sqlcipher() -> bool:

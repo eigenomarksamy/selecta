@@ -18,8 +18,11 @@ dependencies = [
 # them inside its command handler, so `selecta --help` and unrelated subcommands
 # work without them installed.
 [project.optional-dependencies]
+# pyrekordbox is bounded below 0.5: 0.5.0 replaced `pyrekordbox.db6`, which
+# core/rekordbox_db.py opens master.db through, with `masterdb`. The browser
+# build pins 0.4.4 (build_browser.py), so the two installs read the same way.
 rekordbox = [
-    "pyrekordbox>=0.4.0",
+    "pyrekordbox>=0.4.0,<0.5",
     # Decrypts master.db where sqlcipher3 is missing (core/sqlcipher.py) - the
     # browser build always, and any platform sqlcipher3 has no wheel for.
     "pycryptodome>=3.19",
@@ -28,7 +31,7 @@ rekordbox = [
 # database - but the package is the same one, so the extra is an alias rather
 # than a second entry.
 analyze = [
-    "pyrekordbox>=0.4.0",
+    "pyrekordbox>=0.4.0,<0.5",
 ]
 # `selecta quality` measures the decoded audio with numpy (clipping, the spectrum
 # behind transcode detection, bit depth); ffmpeg does the decoding and the

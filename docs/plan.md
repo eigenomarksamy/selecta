@@ -80,9 +80,9 @@ still open in each command:
 | --- | --- | --- | --- |
 | `catalog` | partial | The export reads `.mp3` only | None: the `.mp3`-only export is deferred ([Phase 1](#deferred-on-purpose)) |
 | `duplicates` | done | Nothing. Baseline: 158 groups from 3,664 files in 9m12s | — |
-| `rekordbox` | partial | pyrekordbox 0.5 cannot open `master.db`. Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6), but not in the browser build; its `exportLibrary.db` is not read | [F8](#f8), [F9](#f9). Blank artists have no ticket: attaching the USB fills them (CLAUDE.md) |
+| `rekordbox` | partial | Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6), but not in the browser build; its `exportLibrary.db` is not read | [F9](#f9). Blank artists have no ticket: attaching the USB fills them (CLAUDE.md) |
 | `analyze` | done | Cue points and waveforms are skipped on purpose | — |
-| `quality` | done | pyrekordbox 0.5 cannot open the local library. A USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6), but not in the browser build, which does not mount that file | [F8](#f8), [F9](#f9) |
+| `quality` | done | A USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6), but not in the browser build, which does not mount that file | [F9](#f9) |
 | `playlist-diff` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 | `playlist-export` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 
@@ -209,7 +209,8 @@ ticket in this phase needs another.
 
 F5 was a small, local fix with a check that was already known. F6, an
 `export.pdb` reader, filled the last gap shared by `quality` and `rekordbox`.
-Both are done. F8 and F9 are two bugs F6's work found, added on 2026-11-20.
+Both are done. F8 and F9 are two bugs F6's work found, added on 2026-11-20,
+and F8 is done.
 Each ticket's check is its *done when*.
 
 <a id="f5"></a>
@@ -269,7 +270,7 @@ Each ticket's check is its *done when*.
   23 files ([log](#log)). Done before F5, which was only an *after*.
 
 <a id="f8"></a>
-### F8 · pyrekordbox 0.5 cannot open `master.db` · xs
+### F8 · pyrekordbox 0.5 cannot open `master.db` · *done*
 
 - **Where:** `pyproject.toml`'s extras, and the message `quality` prints in
   `features/quality/command.py`.
@@ -288,6 +289,11 @@ Each ticket's check is its *done when*.
   --limit 100` on the reference clone reads the local library again; and with
   0.5.0 installed, the message names the unsupported version.
 - **Needs:** nothing.
+- **Result:** the extras are bounded `>=0.4.0,<0.5`, and a fresh install
+  gets 0.4.4. `rekordbox --export-csv` reads the local library's 3,514 tracks,
+  identically on two runs, and `quality --limit 100` reads it again. With
+  0.5.0 installed, both commands name the version and the fix
+  ([log](#log)).
 
 <a id="f9"></a>
 ### F9 · The browser build does not mount `export.pdb` · s
@@ -821,6 +827,21 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-20 · F8** · Done. The `rekordbox` and `analyze` extras are
+  bounded `pyrekordbox>=0.4.0,<0.5`, the same line as the browser build's 0.4.4
+  pin. A fresh venv's `pip install -e ".[all]"` installs pyrekordbox 0.4.4 and
+  sqlcipher3. In it, `rekordbox --db-path <the local master.db> --export-csv`
+  loads 3,514 tracks, with BPM on 3,504 and key on all, in 3 s, and two runs
+  are byte-identical. `quality --limit 100` on the reference clone reads the
+  local library's 3,514 files and matches 86 of the 100 by name and size. Its
+  report differs from F6's run of the USB's export only in the `rb_` columns,
+  the 14 files the local library does not match, and two rekordbox bitrate
+  flags the export's claims raise. With 0.5.0 installed, `open_database` raises
+  `UnsupportedPyrekordbox`: `quality` says "pyrekordbox 0.5.0 is installed, but
+  selecta reads master.db with pyrekordbox 0.4" and falls back to the USB's
+  export, and `rekordbox` says the same for each tier. Before, both said
+  `pyrekordbox.db6 is not installed`. A pyrekordbox that is missing entirely
+  is still reported as not installed. The browser build is unchanged.
 - **2026-11-20 · plan** · F8 and F9 added as bugs, at the owner's request:
   two gaps F6's work found. pyrekordbox 0.5.0, which the extras allow, cannot
   open `master.db`, and the browser build does not mount `export.pdb`.
