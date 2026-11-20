@@ -625,7 +625,7 @@ the other 78 have no row in it (plan, F6). That run, 54m46s, flags 533: the
 baseline's counts below except rekordbox bitrate, 120 (94 claimed at 32 kbps).
 The browser build does not mount
 `export.pdb` (its mount filter takes audio and `USBANLZ`), so there this
-fallback finds nothing.
+fallback finds nothing (plan, F9).
 
 `--output-csv` requires a value here, while `rekordbox --export-csv` accepts the
 bare flag. That asymmetry is deliberate: this parser has a positional

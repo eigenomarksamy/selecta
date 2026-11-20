@@ -80,9 +80,9 @@ still open in each command:
 | --- | --- | --- | --- |
 | `catalog` | partial | The export reads `.mp3` only | None: the `.mp3`-only export is deferred ([Phase 1](#deferred-on-purpose)) |
 | `duplicates` | done | Nothing. Baseline: 158 groups from 3,664 files in 9m12s | — |
-| `rekordbox` | partial | Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6); its `exportLibrary.db` is not | None: attaching the USB fills the artists (CLAUDE.md) |
+| `rekordbox` | partial | pyrekordbox 0.5 cannot open `master.db`. Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6), but not in the browser build; its `exportLibrary.db` is not read | [F8](#f8), [F9](#f9). Blank artists have no ticket: attaching the USB fills them (CLAUDE.md) |
 | `analyze` | done | Cue points and waveforms are skipped on purpose | — |
-| `quality` | done | Nothing natively: a USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6). The browser build does not mount that file, so there a USB alone still gets none | — |
+| `quality` | done | pyrekordbox 0.5 cannot open the local library. A USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6), but not in the browser build, which does not mount that file | [F8](#f8), [F9](#f9) |
 | `playlist-diff` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 | `playlist-export` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
 
@@ -209,7 +209,8 @@ ticket in this phase needs another.
 
 F5 was a small, local fix with a check that was already known. F6, an
 `export.pdb` reader, filled the last gap shared by `quality` and `rekordbox`.
-Both are done. Each ticket's check is its *done when*.
+Both are done. F8 and F9 are two bugs F6's work found, added on 2026-11-20.
+Each ticket's check is its *done when*.
 
 <a id="f5"></a>
 ### F5 · fpcalc cannot fingerprint a file whose name contains a lone surrogate · *done*
@@ -267,6 +268,45 @@ Both are done. Each ticket's check is its *done when*.
   a new stamp, and `quality`'s report is byte-identical before and after on
   23 files ([log](#log)). Done before F5, which was only an *after*.
 
+<a id="f8"></a>
+### F8 · pyrekordbox 0.5 cannot open `master.db` · xs
+
+- **Where:** `pyproject.toml`'s extras, and the message `quality` prints in
+  `features/quality/command.py`.
+- **Problem:** pyrekordbox 0.5.0 has no `pyrekordbox.db6`, which
+  `core/rekordbox_db.py` imports, and the extras allow `pyrekordbox>=0.4.0`. A
+  fresh install gets 0.5.0, so `rekordbox` and `quality` cannot open any
+  `master.db`, the local library's included. `quality` then says
+  `pyrekordbox.db6 is not installed`, which reads as a missing install. The
+  browser build pins 0.4.4 and is not affected.
+- **Change:** bound the extras below 0.5, as the browser build's pin already
+  is. When the missing module is inside an installed package, say the
+  installed version is not supported instead. Moving to 0.5's `masterdb` is a
+  separate choice, for when there is a reason to.
+- **Done when:** a fresh `pip install -e ".[all]"` installs pyrekordbox 0.4.x;
+  `rekordbox --export-csv` reads the local library's 3,514 tracks; `quality
+  --limit 100` on the reference clone reads the local library again; and with
+  0.5.0 installed, the message names the unsupported version.
+- **Needs:** nothing.
+
+<a id="f9"></a>
+### F9 · The browser build does not mount `export.pdb` · s
+
+- **Where:** the mount filter, `frontend/src/browser/files.ts`, and the rules
+  `selecta.browser.boot` gives it.
+- **Problem:** a picked USB is mounted with its audio and `USBANLZ` only, so
+  its `PIONEER/rekordbox/export.pdb` is not in the tab. `quality` and
+  `rekordbox` on a USB alone therefore get none of the Rekordbox data
+  [F6](#f6) reads natively.
+- **Change:** mount the USB's `export.pdb` as well, with the rule in
+  `browser.boot` beside the others, taken from `core.pdb.EXPORT_PDB` so the
+  two cannot drift.
+- **Done when:** in the browser build, with no `master.db` picked, `quality
+  --limit 100` on the picked reference USB matches 100 of 100 files by path,
+  and `rekordbox --export-csv` is byte-identical to native once paths are
+  mapped.
+- **Needs:** nothing. F6 is done.
+
 ### Deferred on purpose
 
 Two items are deferred on purpose. They are not tickets.
@@ -311,7 +351,8 @@ in a test is a bug.
 
 - **Done when:** the quick tier passes on the current tree, and fails after a
   threshold in `quality/compare.py` is changed on purpose.
-- **Needs:** [F5](#f5), [F6](#f6). F1–F4 are done ([log](#log)).
+- **Needs:** [F5](#f5), [F6](#f6), [F8](#f8): its quick tier reads the local
+  library, which pyrekordbox 0.5 cannot open. F1–F4 are done ([log](#log)).
 
 ## Phase 3 — A place for state that persists
 
@@ -780,6 +821,9 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-20 · plan** · F8 and F9 added as bugs, at the owner's request:
+  two gaps F6's work found. pyrekordbox 0.5.0, which the extras allow, cannot
+  open `master.db`, and the browser build does not mount `export.pdb`.
 - **2026-11-20 · F6** · Done. `export.pdb` is plain DeviceSQL, not encrypted
   as the README said, so `core/pdb.py` reads it with the stdlib, from Deep
   Symmetry's published layout. The oracle is rbxport at `d0ff75b` (1.10.0,
