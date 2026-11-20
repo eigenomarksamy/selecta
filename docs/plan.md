@@ -179,7 +179,7 @@ ticket in this phase needs another.
 - **Needs:** nothing.
 
 <a id="v6"></a>
-### V6 · The `duplicates` stall in Edge · s
+### V6 · The `duplicates` stall in Edge · *done*
 
 - **Check:** one run over 3,664 tracks stopped after about 27 minutes of CPU,
   and the rerun finished. Repeat the run 2–3 times. If it stalls again, capture
@@ -187,6 +187,12 @@ ticket in this phase needs another.
 - **Done when:** 2–3 more runs finish, or a stall's worker state is captured and
   the README records the limit.
 - **Needs:** nothing.
+- **Result:** two more runs in headless Edge 158 both finished, in 21.4 and
+  24.4 min, each with native's 158 groups and 178 of 64,157 pairs confirmed,
+  and zero console errors. Nothing stalled, so the README records no limit.
+  The first stall's cause stays unknown. The editor session driving that run
+  restarted for an update, but the renderer's CPU time puts the stall about
+  ten minutes before the restart ([log](#log)).
 
 <a id="v7"></a>
 ### V7 · The three cancel paths no test could time · s
@@ -904,7 +910,9 @@ D1–D4 were made on 2026-11-13, so none is open today.
 - **A bug in a writer loses library data.** Four things guard against it: each
   writer is its own command, it backs up first, it refuses to run while
   Rekordbox has the file open, and its tests run on fixtures only ([H1](#h1)).
-- **The browser `duplicates` stall has no known cause** ([V6](#v6)).
+- **A long browser run stalled once, for no known cause.** One whole-library
+  `duplicates` run stalled on 2026-10-24, and the three runs since have
+  finished ([V6](#v6)).
 - **There is no CI.** The harness catches only what someone remembers to run.
 
 ## How selecta is built and delivered
@@ -956,6 +964,22 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-20 · V6** · Done. `duplicates` over the reference USB's 3,664
+  tracks in headless Edge 158.0.4370.33 through `puppeteer-core`, against
+  `wrangler dev` with the CSP and isolation enforced, the USB picked through
+  *use the other picker*, a fresh profile per run. Both runs finished, in
+  21.4 and 24.4 min, against 30.5 min in Edge 155. Each read 3,664 tracks,
+  found 64,157 candidate pairs, confirmed 178 and reported 158 groups, with 9
+  of 3,622 tracks unfingerprintable, as native. Zero console errors. The
+  renderer used 1,282 and 1,450 CPU-seconds, about one core throughout. The
+  driver sampled every Edge process's CPU every 10 s and would have captured
+  the worker's call stack after 4 minutes with no progress and almost no CPU.
+  It never did. The first stall, on 2026-10-24: the developer suspected the
+  VS Code session driving it, which did restart for an update between 18:06
+  and 18:18, and the machine did not sleep during the run. But at one core,
+  the stalled renderer's 1,627 CPU-seconds put the stall near 17:55, before
+  the restart, so its cause stays unknown. The driver is not in the tree
+  ([H1](#h1)'s browser tier will commit one).
 - **2026-11-20 · W3, W4, C1, C2** · Added, from the developer's ideas. W3
   copies a `playlist-export` report as a list of `artist - track` lines, on
   the page only. W4 takes the ecosystem's tab icon (shared decision SD5),

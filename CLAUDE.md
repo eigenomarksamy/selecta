@@ -1019,8 +1019,9 @@ byte-identical to native once `C:\…\` paths are mapped to `/music/<folder>/…
 Cancel: `catalog` 0.2 s after the click, `analyze` 0.4 s, `quality` mid-decode
 0.4 s, with every report unchanged; the restart fallback 0.2 s. Isolation costs
 nothing measurable. **One whole-library `duplicates` run stalled** (every Edge
-process at 0% CPU after ~27 min, no error anywhere), and the rerun finished; the
-cause is unknown (plan, V6).
+process at 0% CPU after ~27 min, no error anywhere), and the rerun finished. Two
+more runs in Edge 158 on 2026-11-20 finished too, in 21–24 min with the same 158
+groups. The cause of the stall is unknown (plan, V6).
 
 **Verified** in headless Edge via `puppeteer-core` with the CSP enforced: every
 command through the real forms, byte-compared to native; playback of a picked
