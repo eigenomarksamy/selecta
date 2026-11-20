@@ -170,7 +170,5 @@ def _name(track: PlaylistTrack) -> str:
 
 
 def _duration(ms: Optional[int]) -> str:
-    if not ms:
-        return ""
-    seconds = round(ms / 1000)
-    return f"{seconds // 60}:{seconds % 60:02d}"
+    """Spotify's duration as `clock` writes the local one: 6:05, or 1:02:13 past an hour."""
+    return clock(ms / 1000) if ms else ""
