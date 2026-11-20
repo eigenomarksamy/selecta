@@ -59,8 +59,8 @@ work found.
 
 **Priority.** The dependency diagram puts the phases in three columns, which
 map onto the Project's priorities: Phases 0 and 1 (*now*) are P1, Phases 2 and
-3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W1, DOC1 and SCM1
-are P2. A priority set in the Project overrides this.
+3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W1, W2, DOC1 and
+SCM1 are P2. A priority set in the Project overrides this.
 
 **Adding work.** A new ticket takes the next number in its lane. A split ticket
 keeps its number and adds a letter (F6a, F6b). A new lane takes a prefix no
@@ -574,7 +574,7 @@ Every ticket in this phase needs [H1](#h1).
 
 ## Outside the phases
 
-One small change needs none of the phases, so it can land at any time.
+Two small changes need none of the phases, so either can land at any time.
 
 <a id="w1"></a>
 ### W1 · A button back to eigenomar.com · xs
@@ -587,6 +587,42 @@ One small change needs none of the phases, so it can land at any time.
   would lose them. A link adds no origin, so the browser CSP stays closed.
 - **Done when:** the button shows on selecta.eigenomar.com, works by keyboard,
   and opens eigenomar.com in a new tab while jobs and reports stay in place.
+- **Needs:** nothing.
+
+<a id="w2"></a>
+### W2 · Explain the quality report's issues on the page · s
+
+- **Change:** the quality view, `frontend/src/views/QualityView.tsx`, names
+  each issue by its kind, such as `transcode?` or `rekordbox bitrate`, in the
+  filter chips, in each row's Issues column and in an open row's list of
+  sentences. Nothing on the page says what a kind means or what raises it. The
+  README's issue table is the only explanation, and it groups the claim kinds
+  as `header …` and `rekordbox …`. Write one explanation for each of the
+  sixteen kinds `quality/compare.py` raises. Each says what the issue means,
+  the threshold behind it, from `compare.py`'s named constants (the cutoff
+  floors, a 0.1% clip rate, 3 decode errors, the 15% bitrate tolerance, 1 s
+  and 2 s for lengths), and what to do next, such as playing the file before
+  replacing it. Keep them in one map beside `AUDIO_PROBLEMS`, kept in step
+  with `compare.py` and the README the same way. Show them in two places:
+  - **On the issue itself:** a chip or a row's issue badge shows its
+    explanation in a small box on hover and on keyboard focus. Chips already
+    filter on click, and the box must not change that. Badges become
+    focusable so that keyboard users can open the box.
+  - **In a table on the page:** a collapsible "What the issues mean" table
+    under the "evidence, not a verdict" note lists every kind with its
+    explanation, coloured red or amber like the chips. It works on a touch
+    screen, which has no hover, and it also lists kinds this report did not
+    raise.
+
+  A separate info page was considered and not chosen, because it takes the
+  reader away from the report. A kind the map does not know, from an older or
+  newer report, shows as it does today, with no box.
+- **Done when:** on selecta.eigenomar.com and in `selecta web`, with a quality
+  report open, the table explains every kind `compare.py` can raise. Hovering
+  over or tabbing to any chip or issue badge shows that kind's explanation, and
+  moving away or pressing Escape closes it. Clicking a chip still filters. The
+  table opens and closes by keyboard. `npm run build` in `frontend/` passes,
+  and the browser CSP is unchanged.
 - **Needs:** nothing.
 
 ## Ecosystem standards
@@ -661,8 +697,8 @@ flowchart LR
 The top row leads to the writers and the bottom row to the network features.
 The two tracks are independent, so they can be worked in parallel, and there is
 no arrow between them. No phase has a date yet. The gates in the decisions
-table below sit inside the phases, not between the boxes. W1, DOC1 and SCM1 are
-outside both tracks. An arrow is a hard need only for the tickets of its phase
+table below sit inside the phases, not between the boxes. W1, W2, DOC1 and SCM1
+are outside both tracks. An arrow is a hard need only for the tickets of its phase
 that use what it carries ([How this plan works](#how-this-plan-works)).
 
 ## Open decisions
@@ -738,6 +774,10 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-20 · plan** · W2 added, at the owner's request: the quality view
+  names its issues but never explains them. The explanations go on each issue,
+  shown on hover and on focus, and in a table on the page. An info page of
+  their own was the third option, and it was not chosen.
 - **2026-11-19 · F5** · Done. The name reaches fpcalc intact: a Python child
   given the same argv reads it whole and finds the file. fpcalc 1.6.1 opens
   Cyrillic and Korean names, so it converts its wide argv to UTF-8 for FFmpeg,
