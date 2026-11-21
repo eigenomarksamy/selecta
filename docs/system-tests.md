@@ -23,7 +23,12 @@ is what each ticket's *done when* asks for.
   must print `true`. If it prints `false`, stop and note it, because every
   cancel would then restart Python and V7 can't be checked.
 - **Inputs:**
-  - the reference USB, plugged in as a drive, written as `D:\` below;
+  - the reference clone, the full folder copy of the reference USB, which the
+    [native baselines](#native-baselines) were measured on. V5 and V7 use it;
+  - a drive root for V4, written as `D:\` below whatever its letter. That's the
+    reference USB plugged in, or, failing that, the clone mapped to a drive
+    letter with `subst D: <clone folder>`, which `subst D: /d` undoes. Note
+    which one you used;
   - your Rekordbox library's `master.db`;
   - a folder holding nothing but one long mix, two hours or more;
   - a small folder of 5–10 tracks.
@@ -63,15 +68,13 @@ Edge or Chrome. For each run, note the elapsed time from the job page. Also note
 the tab's peak memory from the browser's task manager (Shift+Esc), checked now
 and then during the run.
 
-**5.1 · `rekordbox` with fingerprints over the whole USB.** Pick `D:\` with
-whichever picker worked in V4. Pick no `master.db`, and leave *skip
-fingerprint* off. Then run it.
+**5.1 · `rekordbox` with fingerprints over the whole library.** Pick the
+reference clone's folder with whichever picker worked in V4. Pick no
+`master.db`, and leave *skip fingerprint* off. Then run it.
 
 - **Passes when** the run ends with exit code 0, and its log and
   `duplicates.csv` match the [native baseline](#native-baselines): 3,664 tracks
-  loaded, 446 candidate pairs and 131 groups. If the USB has changed since the
-  reference clone was copied, ask a session to run the native baseline again
-  on the USB itself.
+  loaded, 446 candidate pairs and 131 groups.
 - **If it stalls,** meaning the progress hasn't moved for 5 minutes and the
   tab's CPU in Shift+Esc is near 0, don't close the tab. Note the time,
   screenshot the task manager, and call a session to capture the worker's
@@ -140,8 +143,8 @@ page but not Python, and that makes the timing exact.
 - **Passes when** the job shows *succeeded* with the 7.2 line, the new report is
   in Reports and opens, and *After* holds. The *After* run must not be
   cancelled by the late signal.
-- **Then by hand, without the dialog trick:** run `catalog` on `D:\`, which
-  takes about 20 s. Click **Cancel** at about 18 s, and confirm the moment the
+- **Then by hand, without the dialog trick:** run `catalog` on the reference
+  clone, which takes about 20 s. Click **Cancel** at about 18 s, and confirm the moment the
   log shows the run is done. Do this 3 times. Any signature in the table passes,
   as long as Reports agrees with it. Note which ones you got.
 
