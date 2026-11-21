@@ -168,6 +168,7 @@ ticket in this phase needs another.
   both pickers, and `master.db` picked through the real Windows file dialog.
 - **Done when:** each pick mounts and a command runs on it, or the README
   records the limit.
+- **How:** [system tests, V4](system-tests.md#v4--real-pickers).
 - **Needs:** nothing.
 
 <a id="v5"></a>
@@ -176,6 +177,8 @@ ticket in this phase needs another.
 - **Check:** `rekordbox` with fingerprints over all 3,664 tracks in a tab, and
   `quality` on a file several hours long.
 - **Done when:** both finish in a tab, or the README records the limit.
+- **How:** [system tests, V5](system-tests.md#v5--browser-runs-at-library-scale),
+  with native baselines measured on 2026-11-21.
 - **Needs:** nothing.
 
 <a id="v6"></a>
@@ -201,6 +204,9 @@ ticket in this phase needs another.
   cancel sent while the run waits behind another call.
 - **Done when:** each of the three ends with no report changed, as the other
   cancel paths do, or the README records the limit.
+- **How:** [system tests, V7](system-tests.md#v7--the-three-cancel-paths-no-test-could-time).
+  The third path is checked as a run held up by its first install. A run held
+  up behind another call can't be timed by hand.
 - **Needs:** nothing.
 
 <a id="v8"></a>

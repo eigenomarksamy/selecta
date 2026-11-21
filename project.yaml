@@ -15,7 +15,7 @@ links:
 documents:
   plan: docs/plan.md
   architecture: [CLAUDE.md#design, README.md#layout, docs/rekordbox.md, docs/analyze.md]
-  engineering: [CLAUDE.md#commands, CLAUDE.md#conventions, CLAUDE.md#delivery, README.md#install, README.md#build-and-deploy]
+  engineering: [CLAUDE.md#commands, CLAUDE.md#conventions, CLAUDE.md#delivery, README.md#install, README.md#build-and-deploy, docs/system-tests.md]
   decisions:                       # the rules already decided, then the decisions made in the plan
     - CLAUDE.md#the-two-architectural-rules
     - CLAUDE.md#plan
