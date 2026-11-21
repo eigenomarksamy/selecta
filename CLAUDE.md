@@ -1034,9 +1034,10 @@ no horizontal scroll; zero console errors. When driving it, pass
 `--memory-pressure-off` (with little memory free the back/forward cache is
 evicted), and poll from Node, because `waitForSelector` never returns under this
 page's CSP. A real Spotify login from the live site was checked by hand on
-2026-11-19 (V1). **Not verified:** Firefox and Safari (V3),
-`showDirectoryPicker` on a real folder, a drive root and the real `master.db`
-file dialog (V4), a library-scale `rekordbox` fingerprint run and a multi-hour
+2026-11-19 (V1). The real pickers were checked by hand on 2026-11-21 (V4):
+`showDirectoryPicker` on a real folder, a drive root in both pickers, and the
+real `master.db` through the Windows file dialog, with Rekordbox closed and
+open. **Not verified:** Firefox and Safari (V3), a library-scale `rekordbox` fingerprint run and a multi-hour
 `quality` file in a tab (V5), and three cancel paths no test could time (V7).
 
 ### conventions

@@ -124,7 +124,8 @@ exception is a task to redesign.
 ## Phase 0 — Close the verification gaps
 
 The check no simulation could stand in for, a real Spotify login
-([V1](#v1)), passed on 2026-11-19. A real Cloudflare deploy of the browser build was checked on
+([V1](#v1)), passed on 2026-11-19. The real pickers ([V4](#v4)) passed by hand
+on 2026-11-21. A real Cloudflare deploy of the browser build was checked on
 2026-11-09 ([log](#log)). Beyond that, both front ends were tested only against
 fakes: a simulated Spotify API, `wrangler dev`, and headless Edge driven through
 CDP. This phase needs no new code unless a check fails.
@@ -162,7 +163,7 @@ ticket in this phase needs another.
 - **Needs:** nothing.
 
 <a id="v4"></a>
-### V4 · Real pickers · xs
+### V4 · Real pickers · *done*
 
 - **Check:** `showDirectoryPicker` on a real folder, a drive root (`D:\`) in
   both pickers, and `master.db` picked through the real Windows file dialog.
@@ -170,6 +171,12 @@ ticket in this phase needs another.
   records the limit.
 - **How:** [system tests, V4](system-tests.md#v4--real-pickers).
 - **Needs:** nothing.
+- **Result:** every pick mounted and its command ran on the live site, so the
+  README records no new limit. That covers `showDirectoryPicker` on a real
+  folder, `D:\` in both pickers, and the real `master.db` through the Windows
+  file dialog, with Rekordbox closed and with it open. With *use the other
+  picker*, the browser words the pick as an upload. That's the browser's own
+  dialog, which the README already explains ([log](#log)).
 
 <a id="v5"></a>
 ### V5 · Browser runs at library scale · s
@@ -970,6 +977,18 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-21 · V4** · Done, by hand on selecta.eigenomar.com, following
+  [system tests](system-tests.md#v4--real-pickers) 4.1–4.5. 4.1:
+  **Choose folder…** on a small folder, then `catalog`. 4.2 and 4.3: `D:\`
+  through **Choose folder…** and through *use the other picker*, then
+  `rekordbox --export-csv`. 4.4 and 4.5: the real `master.db`, picked through
+  the Windows file dialog by typing `%APPDATA%\Pioneer\rekordbox`, then
+  `quality --limit 20` on `D:\`, with Rekordbox closed and then open. Every pick
+  mounted, every run passed, and nothing failed. The only thing noted is the
+  browser's own *upload* wording for the other picker. The README already
+  explains it, and the developer chose not to change the page's help text for
+  it. The same day, `docs/system-tests.md` was added for V4, V5 and V7, with
+  native baselines for V5 from the reference clone.
 - **2026-11-20 · V6** · Done. `duplicates` over the reference USB's 3,664
   tracks in headless Edge 158.0.4370.33 through `puppeteer-core`, against
   `wrangler dev` with the CSP and isolation enforced, the USB picked through
