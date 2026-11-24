@@ -165,6 +165,10 @@ ticket in this phase needs another.
   SharedArrayBuffer.
 - **Done when:** all three work in both browsers, or the README says where they
   don't.
+- **How:** a session runs the three checks in Playwright's Firefox and WebKit.
+  The developer decided on 2026-11-24 that WebKit on Windows stands in for
+  Safari, rather than waiting for a Mac or an iPhone. The README records
+  WebKit's results as WebKit's and says real Safari is untested ([log](#log)).
 - **Needs:** nothing.
 
 <a id="v4"></a>
@@ -1361,6 +1365,10 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-24 · V3** · Decided: Playwright's WebKit on Windows stands in for
+  Safari. It's the same engine but not Safari itself, so the README will say
+  real Safari is untested. That lets a session close V3 without an Apple
+  device. Firefox is checked through Playwright's Firefox.
 - **2026-11-24 · V5, V7** · Done, by hand on selecta.eigenomar.com, following
   [system tests](system-tests.md) 5.1–5.2 and 7.1–7.3. The developer
   confirmed that every scenario passed and nothing failed, so the README
