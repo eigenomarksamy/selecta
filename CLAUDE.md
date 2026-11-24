@@ -78,8 +78,8 @@ ships. State how many tracks each figure was measured on.
 
 The plan is [docs/plan.md](docs/plan.md): verification first, then the known
 debt, a regression harness and a persistent state root, then the five planned
-features, as tickets in lanes (V, F, H, S, L, G, R, X, C, W, DOC, SCM), with the
-decisions already made (D1–D4). Each ticket has a stable anchor, its id in
+features, as tickets in lanes (V, F, H, S, L, G, R, X, C, W, SET, DOC, SCM),
+with the decisions already made (D1–D6). Each ticket has a stable anchor, its id in
 lowercase, and exactly one GitHub issue titled `<id>: <title>` whose body links
 that anchor. An id is never reused or renumbered.
 

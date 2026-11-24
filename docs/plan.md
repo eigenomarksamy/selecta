@@ -29,6 +29,7 @@ does.
 | X | Phase 7: export to Traktor and Serato |
 | C | Outside the phases: `convert`, new audio files made from the library's |
 | W | Outside the phases: small changes to the page |
+| SET | Outside the phases: setcraft, composing and documenting DJ sets in the page |
 | DOC | Outside the phases: the product's documents, vision, architecture, design, testing strategy, and verification and validation |
 | SCM | Outside the phases: source control and delivery, CI, branching, protection, releases and versioning |
 | D | Decisions. These are not tickets |
@@ -61,7 +62,9 @@ work found.
 **Priority.** The dependency diagram puts the phases in three columns, which
 map onto the Project's priorities: Phases 0 and 1 (*now*) are P1, Phases 2 and
 3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W1–W4, C1, DOC1
-and SCM1 are P2, and C2 is P3. A priority set in the Project overrides this.
+and SCM1 are P2, and C2 is P3. SET1–SET6 and SET12, setcraft's first version,
+are P2, and the rest of the SET lane is P3. A priority set in the Project
+overrides this.
 
 **Adding work.** A new ticket takes the next number in its lane. A split ticket
 keeps its number and adds a letter (F6a, F6b). A new lane takes a prefix no
@@ -97,7 +100,8 @@ playlist commands were checked there with a real Spotify login on 2026-11-19
 The five planned features are the library manager, Serato/Traktor export,
 rbxport integration, genre enrichment and `selecta dig`. They are designed in
 the README's [Ideas](../README.md#ideas--not-implemented) section, and none has
-any code yet.
+any code yet. Setcraft, a part of the page for composing DJ sets, is planned in
+[the SET lane](#the-set-lane-setcraft) and has no code yet either.
 
 ## Rules every phase keeps
 
@@ -653,8 +657,8 @@ Every ticket in this phase needs [H1](#h1).
 ## Outside the phases
 
 These need none of the phases, so any of them can land at any time: W1–W4,
-small changes to the page, and the C lane, a new command that makes MP3s from
-lossless files.
+small changes to the page, the C lane, a new command that makes MP3s from
+lossless files, and the SET lane, setcraft.
 
 <a id="w1"></a>
 ### W1 · A button back to eigenomar.com · xs
@@ -826,6 +830,372 @@ OGG and Opus inputs are never offered.
   each AAC as skipped, lossy.
 - **Needs:** [C1](#c1).
 
+### The SET lane: setcraft
+
+Setcraft composes, checks and documents DJ sets. It imports a library, builds
+any number of sets from it, shows how each one flows, and exports them. It
+supports decisions and never makes them: it does not mix, analyse audio, or
+change a file or a tag. It is a part of the page, at `#/sets`, in `selecta web`
+and on selecta.eigenomar.com alike, and its logic is TypeScript in
+`frontend/src/setcraft/` ([D5](#open-decisions)). It is the first part of the
+page that is not a view of a command's report. Python reads only the libraries
+the page cannot: `master.db`, `export.pdb` and a folder's tags, through a
+command of their own ([SET4](#set4)), whose report setcraft opens.
+
+What every ticket in the lane keeps:
+
+- **Nothing outlives the tab unless it is exported.** A session is saved to
+  the tab's sessionStorage, so a reload or a crash keeps it and closing the tab
+  ends it ([D6](#open-decisions)). What must last is exported in setcraft's own
+  format and imported again. Setcraft uses neither localStorage nor the state
+  root.
+- **The library is read-only, and its text stays as written.** Titles, artists
+  and keys are shown and exported with their own spelling and capitalisation.
+  What the user adds, a playing BPM or length, a key for an untagged track, a
+  note, belongs to the set, never the library, and shows as the user's.
+- **Warnings advise.** Every check can be tuned or switched off, every warning
+  can be dismissed on its own, and none stops an edit.
+- **The browser CSP stays closed.** Libraries, artwork and exports stay in the
+  tab, and no origin is added.
+- **No new dependency.** The page has React alone. Drag and drop, the timeline
+  and XML parsing use what the browser has, and everything that can be dragged
+  can also be moved by keyboard.
+- **Logic stays apart from the page.** Key parsing, compatibility, length
+  estimates, warnings, suggestions, and every format's reader and writer are
+  plain modules with tests ([SET1](#set1)).
+
+**Order.** The first version is SET1–SET6 and SET12: a library from a
+Rekordbox XML, `master.db`, `export.pdb` or a folder, a sequenced set that
+survives in a file, and a playlist Rekordbox imports. The rest follow in any
+order their needs allow.
+
+**Later, and not tickets:** generating a set automatically, optimising its
+order, harmonic strategies beyond Camelot's conventional moves, objectives to
+optimise for, comparing a set's versions, and analysis of a set's musical
+progression beyond key and BPM. Uploading recordings or linking them, folders
+and archives of sets, and public share links are not planned at all.
+
+<a id="set1"></a>
+### SET1 · The setcraft area, its model and a set's properties · m
+
+- **Change:** a `#/sets` route and a sidebar entry, in both builds. The
+  model, `frontend/src/setcraft/model.ts`, is plain data. A session holds one
+  library and any number of sets. A set holds its properties, its pool, its
+  slots (each with candidate tracks, at most one of them chosen, and a note),
+  its phases, its versions, its dismissed warnings and its settings. A set
+  refers to a track by its library id and keeps a copy of the track's metadata
+  from when it was added, so it still reads the same against another library.
+  A set can be created with no tracks and no properties, renamed, duplicated and
+  deleted. Every property is optional: a name (the time it was created, when
+  none is given), a target length, styles and genres (several free-text entries
+  each), the medium of play (club, event, radio show, stream or free text),
+  artwork (an image the user picks, held as a data URL), the performance date
+  and time, the recording status (not planned, planned, recorded) and date, a
+  description, the creative intention, and notes.
+  - **Tests:** an `npm test` script in `frontend/` runs `node --test` over
+    `src/setcraft/**/*.test.ts`. Node 24 strips the types itself, so this adds
+    no dependency. `tsconfig.json` gains `allowImportingTsExtensions` and
+    `erasableSyntaxOnly`, so the modules import each other the way Node needs.
+    The page uses no syntax that option refuses.
+  - **Documents:** `CLAUDE.md` gets a setcraft section, saying that it is a
+    part of the page with logic of its own and not a view of a report, with
+    the lane's rules, and its layout gets `frontend/src/setcraft/`.
+- **Done when:** in `selecta web` and on selecta.eigenomar.com, two sets
+  exist side by side, and every property can be set and cleared. A set with no
+  name shows the time it was created, a duplicate changes without changing its
+  source, and the artwork shows on its set. `npm test` and `npm run build` pass,
+  and the browser CSP is unchanged.
+- **Needs:** nothing. [D5](#open-decisions) is decided.
+
+<a id="set2"></a>
+### SET2 · A library from a Rekordbox XML · m
+
+- **Change:** a Rekordbox collection XML (*File › Export Collection in xml
+  format*) becomes the session's library, read in the page with `DOMParser`.
+  Each `TRACK` in `COLLECTION` gives its id (`TrackID`), artist, title, BPM
+  (`AverageBpm`), key (`Tonality`), length (`TotalTime`), and the file's path,
+  decoded from `Location`'s `file://localhost/` URL. `keys.ts` reads Camelot
+  (`8A`), Open Key (`1m`) and musical names (`Am`, `A minor`, `Dbm`, `C#m`)
+  into one form for the checks, and the original text is what shows. A track
+  with no artist, title, BPM, key or length, or with a key nothing reads, is
+  flagged with the reason. The library view searches, sorts and filters on
+  every field and on the flags. Loading a library again replaces the old one
+  and keeps every set: tracks are matched again by id, then by path, and a
+  track the new library lacks stays in its set, shown from its copy and
+  flagged.
+- **Done when:** the developer's collection XML loads, and the page states how
+  many tracks it read and how many it flagged, by reason. The track count
+  equals the number of `TRACK` elements in its `COLLECTION`. `keys.ts`'s tests
+  read every key in all three notations, and refuse a key that is none of them.
+  Titles and artists show exactly as the XML writes them, accents and
+  capitalisation included. After loading the library again without one of a
+  set's tracks, the set still shows that track, flagged.
+- **Needs:** [SET1](#set1).
+
+<a id="set3"></a>
+### SET3 · `rekordbox`'s track readers move to `core` · m
+
+- **Change:** [SET4](#set4) needs the readers `rekordbox` has, and a feature
+  cannot import a sibling. `features/rekordbox/reader.py`'s source resolution,
+  the four tiers that turn a `master.db`, a USB's `export.pdb` or tags into
+  `Track`s, moves to `core`, beside `rekordbox_db.py`, and `rekordbox` imports
+  it from there. Nothing it reads changes. The library manager
+  ([Phase 4](#phase-4--library-manager-with-rbxport-as-the-oracle)) needs the
+  same move.
+- **Done when:** on the local library (3,514 tracks) and on the reference USB,
+  `rekordbox --export-csv` and `--duplicates-by-name` give byte-identical
+  output before and after the move, and so does the duplicate report on the
+  local library (6 groups). `selecta --help` works with no extras installed.
+  `CLAUDE.md`'s `core` and `rekordbox` sections say where the readers are.
+- **Needs:** nothing.
+
+<a id="set4"></a>
+### SET4 · `selecta library`: a library from `master.db`, `export.pdb` or a folder · m
+
+- **Change:** a new read-only feature, `features/library/`, registered in
+  `cli.FEATURES`: `selecta library [source]`. The source is a `master.db`, an
+  `export.pdb`, a USB or a folder, and with none it is the local `master.db`.
+  It reads through [SET3](#set3)'s readers. A folder is read from its tags
+  through `core.tags`, with a variant of `tracks_from_files` that keeps a file
+  whose length it cannot read and leaves the length blank, since a library
+  must list every file. It writes `out/library/library_<name>.json`: its
+  format's name and version, the source, and one entry per track with
+  `Track`'s fields. In the browser build it is online, with a picked
+  `master.db` or folder. Setcraft opens a library from the `library_*.json`
+  reports the page's API lists, or from a file picked from disk, so a library
+  made by the CLI opens too. Its tracks go through SET2's key reading and
+  flags. A `master.db` read alone leaves many artists blank (CLAUDE.md,
+  `rekordbox`), and those are flagged like any missing field.
+- **Done when:** runs on the local library, on the reference USB and on a
+  folder of the reference clone each state their track count and write a
+  library that setcraft opens. Its counts equal `rekordbox --export-csv`'s on
+  the same source. Paths are absolute on the machine natively and under
+  `/music/<folder>` in a tab, and the two runs give the same library once
+  paths are mapped. `selecta --help` works with no extras installed. The
+  README's command table and `CLAUDE.md` describe the command, with its
+  measured baseline.
+- **Needs:** [SET3](#set3), and [SET2](#set2) for setcraft to open its file.
+
+<a id="set5"></a>
+### SET5 · Setcraft's own format, and the tab's autosave · m
+
+- **Change:** a set exported as `<name>.setcraft.json` keeps everything that
+  can be edited: its properties and artwork (as base64), each track's
+  reference and copy of its metadata, the pool, slots, candidates and chosen
+  tracks, phases, playing BPMs and lengths, overlaps, notes, dismissed
+  warnings, settings, versions, and notes made after the performance. The file
+  names its format and version. A later ticket that adds a field adds it as an
+  optional field, so the format stays at version 1 until a change cannot be
+  optional. An older version is upgraded on import, and a newer one is refused
+  with a message saying so. Exporting several sets at once writes one file
+  holding them all. An import matches tracks against the library by id, then
+  by path, then by artist, title and length, and lists the tracks it could not
+  match ([SET13](#set13) resolves them). The session is also saved in this
+  format to sessionStorage after each change, at most once a second, and
+  restored on load. When it does not fit, about 5 MB, the autosave leaves the
+  artwork out first and the page says so.
+- **Done when:** a set that uses every field exports, imports into a fresh tab
+  against the same library, and exports again byte-identical. A reload in the
+  middle of an edit keeps every set, and closing the tab and opening the site
+  again starts empty. A file with a newer format version is refused with its
+  message. Tests cover the round trip, the upgrade and the matching order.
+- **Needs:** [SET1](#set1). [D6](#open-decisions) is decided.
+
+<a id="set6"></a>
+### SET6 · The sequence and the pool · m
+
+- **Change:** a set's order of tracks, and its pool of tracks not yet placed.
+  Tracks are added from the library one at a time or as a selection, to the
+  end, at a position or to the pool. They are removed, and reordered by drag
+  and drop and by keyboard (up, down, to a position). Tracks move from the pool
+  into the order the same ways. Each track in a set can have a note, a playing
+  BPM and a playing length, all optional, shown beside its own values, which
+  never change. A track can appear more than once, and each repeat is
+  flagged. Without slots ([SET7](#set7)), each track is a slot of its own:
+  this is the free-form way to build a set.
+- **Done when:** in both builds, a set of 30 tracks can be built, reordered by
+  mouse and by keyboard alone, and filled from its pool. The library's values
+  show beside the set's, and a repeated track is flagged. Tests cover inserting
+  and reordering.
+- **Needs:** [SET2](#set2).
+
+<a id="set7"></a>
+### SET7 · Slots and candidates · m
+
+- **Change:** building by slots, the default for a set with a target length.
+  Slots come from the target length divided by an average playing length, or
+  from a count the user gives. They can be added at the end, inserted, removed
+  and reordered, and a slot can stay empty. A slot holds a note saying its
+  purpose, and any number of candidate tracks, one of which can be chosen. A
+  slot with candidates and none chosen is incomplete. Switching a set to
+  free-form keeps its chosen tracks and, after asking, drops the slots with
+  none.
+- **Done when:** a 2-hour target at a 4-minute average gives 30 slots. Slots
+  can be filled, emptied, given candidates and have one chosen, by mouse and
+  by keyboard alone, and the empty and incomplete slots are counted. Tests
+  cover generating slots and switching modes.
+- **Needs:** [SET6](#set6).
+
+<a id="set8"></a>
+### SET8 · The set's estimated length · s
+
+- **Change:** a set's length is the sum of each chosen track's playing length,
+  minus each transition's overlap. A track's playing length is the one the
+  user set or, failing that, its own length scaled by its BPM over its playing
+  BPM. Overlaps are counted in bars, a set-wide default of 16 with an override
+  per transition, and turned into seconds at the outgoing track's playing BPM.
+  Where that track has no BPM, the set's overlap in seconds is used instead,
+  30 s by default. An empty or incomplete slot counts as the set's average
+  playing length. The estimate shows beside the target with the difference,
+  and a set over or under its target is flagged. A track whose playing length
+  is under a threshold, 1:30 by default, is flagged as short.
+- **Done when:** tests check the estimate on worked examples: a playing BPM
+  without a playing length, a per-transition overlap, an empty slot, an
+  outgoing track with no BPM, and a short track. The page shows the same
+  figures as the tests for a fixture set.
+- **Needs:** [SET7](#set7).
+
+<a id="set9"></a>
+### SET9 · Transition checks and warnings · m
+
+- **Change:** each pair of neighbouring chosen tracks is checked, and an empty
+  slot between two tracks means they are not a pair.
+  - **Key:** Camelot's conventional moves, the same key, one step around the
+    wheel and the relative major or minor, are compatible by default, and the
+    set's settings switch each move on or off. With key lock off for the set
+    (it is on by default), a playing BPM moves the key by 12·log2(playing ÷
+    own) semitones, rounded, before the check.
+  - **BPM:** two playing BPMs are compatible within a threshold, 10% by
+    default, at 1:1, 1:2, 2:1, 3:4 or 4:3, and each ratio can be switched off.
+  - **Warnings:** these, SET2's metadata flags, SET6's repeats, SET8's lengths
+    and the tracks an import could not match go in one list per set and
+    follow every edit. Each can be acknowledged or dismissed on its own, and
+    the set keeps that for that warning and those tracks: when the pair
+    changes, the warning is new. Each check can be switched off.
+- **Done when:** tests cover every move in all three key notations, key lock on
+  and off, each ratio at the edges of its threshold, and a pair broken by an
+  empty slot. In both builds, a dismissed warning stays dismissed through an
+  export and an import, and an edit that removes its cause removes it.
+- **Needs:** [SET6](#set6).
+
+<a id="set10"></a>
+### SET10 · The set's views: list, table and overview · m
+
+- **Change:** three views of the same set. The **list** shows each chosen
+  track as artist and title and nothing else. The **table** shows the columns
+  the user chooses, the library's BPM and length beside the playing ones, and
+  each row's warnings, and the set keeps the choice. The **overview** shows the
+  artwork, target length, estimate and difference, the number of tracks and of
+  different tracks, slots in all, filled and empty, candidates, the pool's
+  size and the warnings.
+- **Done when:** in both builds, the three views show the same set, the list
+  and the overview fit a phone's width without scrolling sideways, and tests
+  check the overview's counts against a fixture set.
+- **Needs:** [SET8](#set8), [SET9](#set9).
+
+<a id="set11"></a>
+### SET11 · The timeline and phases · m
+
+- **Change:** an SVG timeline the page draws itself. Each chosen track is a
+  block as long as its playing length, overlapping its neighbours by the
+  transition's overlap. An empty slot is a gap as long as the average playing
+  length. BPM is drawn as a line and key as a band coloured by its place on the
+  Camelot wheel. Phases are named ranges of slots that the user makes, names
+  and resizes. Introduction, build-up, peak, transition and closing are offered
+  as names, and nothing is imposed. A phase's ends are slots, so it moves with
+  them when slots move.
+- **Done when:** the timeline's end agrees with SET8's estimate on a fixture
+  set. Phases can be added, renamed, resized and removed by keyboard alone, and
+  the timeline reads in light and dark themes.
+- **Needs:** [SET8](#set8).
+
+<a id="set12"></a>
+### SET12 · Export: plain text, `.m3u8` and HTML · m
+
+- **Change:** three exports of the set's chosen tracks, in its order, with the
+  library's text as written. None writes to the library. Empty slots are left
+  out, unless the user asks for placeholders in the text or HTML export.
+  - **Plain text:** one line per track, *Artist - Title* or *Title - Artist*,
+    numbered or not, copied or downloaded. It uses [W3](#w3)'s formatter,
+    moved to where both can use it.
+  - **`.m3u8`:** UTF-8 and `#EXTM3U`, then for each track
+    `#EXTINF:<seconds>,<artist> - <title>` and the file's absolute path.
+    Where a path is a tab's, `/music/<folder>/…`, the export asks where that
+    folder is on the machine and writes that instead.
+  - **HTML:** one self-contained document holding a table of the columns the
+    user chooses, and optionally the properties, artwork, notes and
+    statistics, copied as HTML or downloaded.
+- **Done when:** checked by hand in Rekordbox, the `.m3u8` of a 20-track set
+  built from the developer's XML imports as a playlist in the right order and
+  adds no track to the collection. One made from a folder in a tab, after
+  saying where the folder is, does the same. Tests check the text export in
+  both orders, numbered and not, with accents and with a title that holds a
+  spaced hyphen. The HTML opens offline and shows the artwork. The browser CSP
+  is unchanged.
+- **Needs:** [SET6](#set6). After [W3](#w3).
+
+<a id="set13"></a>
+### SET13 · Import sets from text, `.m3u8` and Rekordbox playlists · m
+
+- **Change:** an existing set imported, however it was made, with its order
+  kept. **Text:** one line per track; leading numbers and timestamps are
+  ignored, the user says which side holds the artist, and lines are matched by
+  artist and title, ignoring case and spacing. **`.m3u8`:** matched by path,
+  then by its `#EXTINF` line. **Rekordbox XML:** the playlists under
+  `PLAYLISTS` in the XML SET2 loaded, each imported as a set, matched by
+  `TrackID`. Lines that match no track, or more than one, are listed. The user
+  picks the library track or keeps the line as a placeholder, which is
+  flagged. SET5's imports use the same list.
+- **Done when:** fixture sets in each format import with their order kept, and
+  their unmatched and ambiguous lines can be resolved by hand. A set exported
+  by SET12 as text and as `.m3u8` imports back to the same tracks. Tests cover
+  the text parser and each matching step.
+- **Needs:** [SET2](#set2), [SET6](#set6).
+
+<a id="set14"></a>
+### SET14 · Suggestions by key and BPM · m
+
+- **Change:** for a position or a slot, the library's tracks ranked by how well
+  they fit the chosen tracks before and after it, under SET9's rules and the
+  set's settings: by harmonic move first, then by BPM distance, so the same
+  set always gives the same ranking. Suggestions are offered for an empty
+  slot, as alternatives to either track of a flagged transition, and from the
+  pool alone when the user asks. Tracks already in the set are marked. Each
+  suggestion says why, such as `8A → 9A, +2.1%`. Key and BPM are the only
+  grounds.
+- **Done when:** tests check the ranking and its reasons on a fixture library.
+  On the developer's library, suggestions for a slot are measured to appear in
+  under 100 ms.
+- **Needs:** [SET9](#set9).
+
+<a id="set15"></a>
+### SET15 · Versions, and the set as played · s
+
+- **Change:** a version is a snapshot of a set's content, with a label, the
+  time it was taken, and whether it is planned or played. A set lists its
+  versions, and any version can be opened, restored as the current set, or
+  duplicated as a new set. A played version takes notes made after the
+  performance. Versions go through [SET5](#set5)'s format.
+- **Done when:** a set with a planned and a played version that differ
+  round-trips through SET5 with both intact, and restoring a version changes
+  the current set and leaves every version as it was.
+- **Needs:** [SET5](#set5).
+
+<a id="set16"></a>
+### SET16 · Previews · s
+
+- **Change:** a play button on the rows of the library and of a set, through
+  `player.tsx`. In `selecta web`, a path absolute on the machine plays, as a
+  report's does. In a tab, a track plays when its file is in a picked folder:
+  tracks from an XML or a `master.db` are matched to picked files by the end
+  of their path, the file name and as many folders above it as agree, and the
+  library says how many it matched. A tail that two picked files share matches
+  neither.
+- **Done when:** in both builds, a track from the developer's XML plays and
+  seeks, in a tab after picking its folder. Tests cover the path matching, with
+  accented names and a tail two files share.
+- **Needs:** [SET2](#set2).
+
 ## Ecosystem standards
 
 The ecosystem's contract, in `meta-eigenomar`, is adding two standards that
@@ -898,15 +1268,15 @@ flowchart LR
 The top row leads to the writers and the bottom row to the network features.
 The two tracks are independent, so they can be worked in parallel, and there is
 no arrow between them. No phase has a date yet. The gates in the decisions
-table below sit inside the phases, not between the boxes. W1–W4, C1, C2, DOC1
-and SCM1 are outside both tracks. An arrow is a hard need only for the tickets of its phase
+table below sit inside the phases, not between the boxes. W1–W4, C1, C2, the
+SET lane, DOC1 and SCM1 are outside both tracks. An arrow is a hard need only for the tickets of its phase
 that use what it carries ([How this plan works](#how-this-plan-works)).
 
 ## Open decisions
 
 These are yours to make. Each one blocks only the tickets in its row. When one
 is made, its outcome and date go in its row, and the [log](#log) records it.
-D1–D4 were made on 2026-11-13, so none is open today.
+D1–D4 were made on 2026-11-13 and D5–D6 on 2026-11-24, so none is open today.
 
 | Id | Decision | Options | Recommendation | Blocks | Outcome |
 | --- | --- | --- | --- | --- | --- |
@@ -914,6 +1284,8 @@ D1–D4 were made on 2026-11-13, so none is open today.
 | D2 | Who writes playlists | selecta writes `master.db` itself, or hands off through Rekordbox XML or rbxport | Hand off first | [L5](#l5) | Hand off first, 2026-11-13. L5 records whether a writer of selecta's own is needed |
 | D3 | `catalog`'s exit code for a failed audit | Any non-zero code | One that is not 2, since `--missing-metadata` already uses 2 for a path that is not a directory | F2, done | 1, 2026-11-13 |
 | D4 | `dig` in the browser build | Never, or later | Later, and only once the sources are known to allow CORS | [R5](#r5) | Later, 2026-11-13. R5 stays parked until `dig` exists and its sources are checked for CORS |
+| D5 | Where setcraft's logic lives | The page, in TypeScript, in both builds; or a Python feature run through Pyodide | The page: every edit would otherwise go through the worker, which handles one message at a time and is busy while a command runs | [SET1](#set1), and the lane through it | The page, 2026-11-24: `frontend/src/setcraft/`, in `selecta web` and the browser build alike. Python only reads the libraries the page cannot ([SET3](#set3), [SET4](#set4)) |
+| D6 | What a reload keeps | Nothing; the tab's sessionStorage; or settings alone in localStorage | The tab's sessionStorage | [SET5](#set5) | The tab's sessionStorage, 2026-11-24: a reload or a crash keeps the session, closing the tab ends it, and what must outlive the tab is exported |
 
 ### Risks
 
@@ -977,6 +1349,16 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-24 · SET1–SET16, D5, D6** · Added, from the developer's idea:
+  setcraft, a part of the page that composes, checks and documents DJ sets
+  from a library, and exports them. It never mixes, analyses audio or changes
+  a file or a tag. D5 puts its logic in the page, in both builds, and D6 keeps
+  a session in the tab's sessionStorage, so a reload keeps it and closing the
+  tab ends it. The first version reads a Rekordbox XML in the page (SET2), and
+  `master.db`, `export.pdb` and folders through a new read-only command,
+  `selecta library` (SET4), once `rekordbox`'s readers move to `core` (SET3).
+  The idea's later extensions, automatic generation and ordering among them,
+  are listed in the lane and are not tickets.
 - **2026-11-21 · V4** · Done, by hand on selecta.eigenomar.com, following
   [system tests](system-tests.md#v4--real-pickers) 4.1–4.5. 4.1:
   **Choose folder…** on a small folder, then `catalog`. 4.2 and 4.3: `D:\`
