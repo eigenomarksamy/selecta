@@ -94,8 +94,8 @@ Of the front ends, `selecta web` is done. Its one planned item, a timeline view
 of `analyze`'s phrases, is deferred ([Phase 1](#deferred-on-purpose)). The
 browser build runs every command and deploys to selecta.eigenomar.com. The
 playlist commands were checked there with a real Spotify login on 2026-11-19
-([V1](#v1)), and the build has never been tested in Firefox or Safari
-([V3](#v3)).
+([V1](#v1)). Firefox was checked on 2026-11-24 ([V3](#v3)). In WebKit, runs
+over a real library's files fail ([V9](#v9)), and real Safari is untested.
 
 The five planned features are the library manager, Serato/Traktor export,
 rbxport integration, genre enrichment and `selecta dig`. They are designed in
@@ -130,7 +130,9 @@ exception is a task to redesign.
 The check no simulation could stand in for, a real Spotify login
 ([V1](#v1)), passed on 2026-11-19. The real pickers ([V4](#v4)) passed by hand
 on 2026-11-21, and the library-scale runs ([V5](#v5)) and the three cancel
-paths ([V7](#v7)) on 2026-11-24. A real Cloudflare deploy of the browser build was checked on
+paths ([V7](#v7)) on 2026-11-24. The same day, a session checked Firefox and
+WebKit ([V3](#v3)) and the encoding leftovers ([V8](#v8)), and WebKit's failure
+to read the clone's files became [V9](#v9). A real Cloudflare deploy of the browser build was checked on
 2026-11-09 ([log](#log)). Beyond that, both front ends were tested only against
 fakes: a simulated Spotify API, `wrangler dev`, and headless Edge driven through
 CDP. This phase needs no new code unless a check fails.
@@ -159,7 +161,7 @@ ticket in this phase needs another.
   no new limit ([log](#log)).
 
 <a id="v3"></a>
-### V3 · Firefox and Safari · s
+### V3 · Firefox and Safari · *done*
 
 - **Check:** the `webkitdirectory` picker, the module worker, and cancel through
   SharedArrayBuffer.
@@ -170,6 +172,14 @@ ticket in this phase needs another.
   Safari, rather than waiting for a Mac or an iPhone. The README records
   WebKit's results as WebKit's and says real Safari is untested ([log](#log)).
 - **Needs:** nothing.
+- **Result:** all three work in both, on the live site through Playwright
+  1.64.1, Firefox 157.0 and WebKit 27.2 on Windows, both cross-origin isolated.
+  Firefox ran `catalog` over the whole reference clone with reports identical
+  to native, and a cancel stopped through the interrupt with exit code 130.
+  WebKit passed the same three checks on a 1,001-file folder. But its runs
+  over the clone's own files fail with a Pyodide fatal error while reading a
+  picked file. The README records that as a limit, with real Safari untested,
+  and [V9](#v9) takes the failure ([log](#log)).
 
 <a id="v4"></a>
 ### V4 · Real pickers · *done*
@@ -237,13 +247,40 @@ ticket in this phase needs another.
   scripted check, which [H1](#h1)'s browser tier could hold ([log](#log)).
 
 <a id="v8"></a>
-### V8 · Encoding leftovers · xs
+### V8 · Encoding leftovers · *done*
 
 - **Check:** redirect `quality` and `playlist-export` output on a file with a
   name outside cp1252. Do one run on POSIX.
 - **Done when:** both redirected runs exit 0 with every report written, and the
   POSIX run's result is recorded. Otherwise, the README records the limit.
 - **Needs:** nothing.
+- **Result:** both exit 0 with every report written, on Windows and on POSIX,
+  so the README records no limit. On Windows, stdout was the cp1252 file
+  CLAUDE.md describes, and every name outside it printed as `\uXXXX`. The
+  reports kept the real names in UTF-8. `playlist-export` ran against a fake
+  Spotify, through the `supplied_token` and `transport` hooks, because a real
+  login can't be done from a session. The POSIX run, in WSL's Ubuntu 22.04,
+  covered `playlist-export` and `catalog`, not `quality`, which needs an
+  ffprobe that WSL lacks ([log](#log)).
+
+<a id="v9"></a>
+### V9 · WebKit can't read the clone's picked files · m
+
+- **Check:** in Playwright's WebKit 27.2 on Windows, a run over files picked
+  from the reference clone fails at its first read with a Pyodide fatal
+  error, `NotFoundError: The object can not be found here.`, raised by the
+  worker's `FileReaderSync` read. Sometimes it's `NoGilError` instead. Find out
+  why, and whether real Safari does the same.
+- **Done when:** the cause is known and fixed, or the README's limit says
+  which browsers it covers and why.
+- **Known so far:** whole-clone runs failed 3 of 3, and single files from the
+  clone failed 6–9 of 10 per round, not the same files each round. Fresh
+  copies of the same files mostly pass: a 1,001-file folder of hard links to
+  one new copy passed 6 of 6. Firefox and Chromium read the same files without
+  error. It isn't the names (`!`, `&`, `#`, `%`, non-ASCII), the hidden `._`
+  stubs, the size of the pick, the 1,000-file staging chunks or the OS file
+  cache ([log](#log)).
+- **Needs:** nothing. A Mac or an iPhone would answer the Safari half.
 
 ## Phase 1 — Known debt in what exists
 
@@ -1273,7 +1310,7 @@ flowchart LR
   end
   subgraph network["the network features"]
     direction LR
-    P0["Phase 0 · verify<br/>V1, V3–V8"] -->|"V1: real login checked"| P3["Phase 3 · state root<br/>S1"]
+    P0["Phase 0 · verify<br/>V1, V3–V9"] -->|"V1: real login checked"| P3["Phase 3 · state root<br/>S1"]
     P3 -->|"cache"| P5["Phase 5 · genre enrichment<br/>G0–G5"]
     P5 -->|"genres for scoring"| P6["Phase 6 · dig<br/>R1–R5"]
   end
@@ -1365,6 +1402,47 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-24 · V3, V9** · V3 done, by a session against
+  selecta.eigenomar.com, headless, with Playwright 1.64.1's Firefox 157.0 and
+  WebKit 27.2 on Windows. Both are cross-origin isolated, have
+  SharedArrayBuffer and no `showDirectoryPicker`, so **Choose folder…** opens
+  the `webkitdirectory` input. **Firefox:** picked the reference clone (3,856
+  audio files, 10,996 analysis files) in 13–20 s. `catalog` over it exited 0
+  in 14–17 s, with 3,840 tracks written, and its CSV and cross-validation were
+  identical to a native run once paths were mapped and line endings ignored.
+  A `catalog` over the clone, cancelled 4 s in, stopped 0.93 s after the click:
+  cancelled, exit code 130, through the interrupt, not a restart. The earlier
+  report was kept, and a rerun succeeded. Eight more small runs all passed.
+  **WebKit:** picked the clone in 9 s, booted Python in its module worker in
+  about 4 s, and ran `catalog` on a 1,001-file folder 6 of 6 times in 9–12 s.
+  Three cancels 2.5 s into that run stopped in 0.33–0.36 s, exit code 130,
+  through the interrupt, with the earlier report kept. But every run over the
+  clone itself failed at its first read with Pyodide's fatal
+  `NotFoundError`, which became V9 with what was ruled out. **Picked counts:**
+  every browser counts the clone's 192 hidden `._` stubs: Chromium 156 picked
+  3,856 audio files too, and wrote native's 3,840 tracks. **Console:**
+  Cloudflare injects an inline script into every page the site serves, its
+  challenge platform's JavaScript detections, which the page's CSP blocks, so
+  every browser logs one CSP error that isn't selecta's. Firefox also logs a
+  Report-Only CSP that the site's headers don't carry, which blocks nothing.
+  The developer chose to log both for now.
+- **2026-11-24 · V8** · Done. **Windows**, with Claude Code's
+  `PYTHONIOENCODING` removed: `quality --no-rekordbox` on a folder `V8 강남 Я`
+  holding `Я не хочу знать.mp3` and `橄欖樹.mp3` from the clone and a broken
+  `깨진.mp3`, redirected with PowerShell's `>` and cmd's `>`. Both exited 0
+  with byte-identical reports, two files measured and the third flagged
+  `undecodable`. The folder and the broken file's path printed as `\uXXXX`.
+  `playlist-export`, redirected with PowerShell's `>`, read the playlist
+  `강남스타일 셋 Я`, with an owner named in Hangul and Greek, from a fake Spotify set through
+  `core.spotify`'s two hooks. It exited 0, printed the name, owner and output
+  path as `\uXXXX`, and wrote the CSV under its own name with the real titles.
+  **POSIX**, in WSL's Ubuntu 22.04 with Python 3.10.12, installed from
+  `git archive` of 32d3264: `playlist-export` as above and `catalog` on the same
+  folder, redirected, under `C.UTF-8`, `LC_ALL=C` and `PYTHONIOENCODING=ascii`.
+  All six exited 0 with reports identical across the three, and the playlist
+  CSV was byte-identical to the Windows one. Names printed as themselves under
+  UTF-8 and as `\uXXXX` under ASCII. `quality` wasn't run on POSIX: WSL has no
+  ffprobe, and installing one needs `sudo`.
 - **2026-11-24 · V3** · Decided: Playwright's WebKit on Windows stands in for
   Safari. It's the same engine but not Safari itself, so the README will say
   real Safari is untested. That lets a session close V3 without an Apple

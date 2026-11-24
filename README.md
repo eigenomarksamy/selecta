@@ -848,6 +848,12 @@ refuses a folder, *use the other picker* under the button switches to that
 input. Either way the browser lists the whole folder first, which for a large
 USB takes it ~10 seconds before the page can show progress.
 
+Chrome, Edge and Firefox are checked. **Safari is untested.** In WebKit, the
+engine Safari uses, the folder picker, Python and cancel all work, but a run
+over a real library's files can stop at its first read with *Pyodide has
+suffered a fatal error*. The cause isn't known yet. Until it is, use Chrome,
+Edge or Firefox, or run selecta locally.
+
 Only what a command reads is handed to Python: audio files, the Rekordbox
 analysis folder (`PIONEER/USBANLZ`), and the USB's own database
 (`PIONEER/rekordbox/export.pdb`), so `quality` and `rekordbox` have Rekordbox's

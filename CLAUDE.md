@@ -1039,8 +1039,15 @@ page's CSP. A real Spotify login from the live site was checked by hand on
 real `master.db` through the Windows file dialog, with Rekordbox closed and
 open. A library-scale `rekordbox` fingerprint run and a multi-hour `quality`
 file in a tab (V5), and the three cancel paths no test could time (V7), passed
-by hand on 2026-11-24. **Not verified:** Firefox and Safari (V3). Playwright's
-WebKit on Windows stands in for Safari, and real Safari stays untested.
+by hand on 2026-11-24. Firefox 157 and WebKit 27.2 were checked through
+Playwright on 2026-11-24 (V3): the `webkitdirectory` picker, the module worker
+and the interrupt cancel work in both, and Firefox's `catalog` over the
+reference clone matches native. **Not verified:** real Safari. **Known
+failure:** in WebKit, runs over the clone's own files die at the first read
+with Pyodide's fatal `NotFoundError` from `FileReaderSync`, cause unknown
+(plan, V9). Drive Firefox and WebKit with `playwright-core` at the version
+whose `browsers.json` matches the installed builds, and pick folders with
+`setFiles(<folder>)` on the file chooser **Choose folder…** opens.
 
 ### conventions
 
@@ -1134,9 +1141,12 @@ playlist CSV with Korean titles, two NTFS names with lone surrogates): `catalog`
 PowerShell `>`, `| Out-String`, cmd `> NUL` and Git Bash `>`; a real console
 shows 강남스타일 as glyphs; surrogate names keep the audit `is_valid: True` and
 round-trip through `duplicates --skip-fingerprint`'s JSON; `selecta web` shows
-Korean titles in its job logs; the browser build's run log is unchanged. Not
-verified: `quality` and `playlist-export` redirected with a non-cp1252 name to
-print, and POSIX (plan, V8).
+Korean titles in its job logs; the browser build's run log is unchanged.
+`quality` and `playlist-export` redirected with non-cp1252 names to print, under
+PowerShell `>` and cmd `>` (`playlist-export` against a fake Spotify through
+`supplied_token` and `transport`), and on POSIX in WSL `playlist-export` and
+`catalog` under `C.UTF-8`, `LC_ALL=C` and `PYTHONIOENCODING=ascii`, all exit 0
+with every report written (plan, V8). Not verified: `quality` on POSIX.
 
 ## delivery
 
