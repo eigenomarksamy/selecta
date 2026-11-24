@@ -129,7 +129,8 @@ exception is a task to redesign.
 
 The check no simulation could stand in for, a real Spotify login
 ([V1](#v1)), passed on 2026-11-19. The real pickers ([V4](#v4)) passed by hand
-on 2026-11-21. A real Cloudflare deploy of the browser build was checked on
+on 2026-11-21, and the library-scale runs ([V5](#v5)) and the three cancel
+paths ([V7](#v7)) on 2026-11-24. A real Cloudflare deploy of the browser build was checked on
 2026-11-09 ([log](#log)). Beyond that, both front ends were tested only against
 fakes: a simulated Spotify API, `wrangler dev`, and headless Edge driven through
 CDP. This phase needs no new code unless a check fails.
@@ -183,7 +184,7 @@ ticket in this phase needs another.
   dialog, which the README already explains ([log](#log)).
 
 <a id="v5"></a>
-### V5 · Browser runs at library scale · s
+### V5 · Browser runs at library scale · *done*
 
 - **Check:** `rekordbox` with fingerprints over all 3,664 tracks in a tab, and
   `quality` on a file several hours long.
@@ -191,6 +192,10 @@ ticket in this phase needs another.
 - **How:** [system tests, V5](system-tests.md#v5--browser-runs-at-library-scale),
   with native baselines measured on 2026-11-21.
 - **Needs:** nothing.
+- **Result:** 5.1 and 5.2 passed by hand on the live site, as the system tests
+  define a pass, so the README records no new limit. The developer confirmed
+  the pass, but the run's figures weren't noted: browser version, elapsed
+  times and the tab's peak memory ([log](#log)).
 
 <a id="v6"></a>
 ### V6 · The `duplicates` stall in Edge · *done*
@@ -209,7 +214,7 @@ ticket in this phase needs another.
   ten minutes before the restart ([log](#log)).
 
 <a id="v7"></a>
-### V7 · The three cancel paths no test could time · s
+### V7 · The three cancel paths no test could time · *done*
 
 - **Check:** the grace-period fallback, a cancel that lands as a run ends, and a
   cancel sent while the run waits behind another call.
@@ -219,6 +224,13 @@ ticket in this phase needs another.
   The third path is checked as a run held up by its first install. A run held
   up behind another call can't be timed by hand.
 - **Needs:** nothing.
+- **Result:** 7.1, 7.2 and 7.3 passed by hand on the live site, as the system
+  tests define a pass. Each ended with its own signature and with *After*
+  holding, so the README records no new limit. The developer confirmed the
+  pass, but the browser version and which signatures 7.2's three hand runs
+  gave weren't noted. As planned, 7.3 covered a run held up by its first
+  install. The exact case of a run queued behind another call is left to a
+  scripted check, which [H1](#h1)'s browser tier could hold ([log](#log)).
 
 <a id="v8"></a>
 ### V8 · Encoding leftovers · xs
@@ -1349,6 +1361,15 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-24 · V5, V7** · Done, by hand on selecta.eigenomar.com, following
+  [system tests](system-tests.md) 5.1–5.2 and 7.1–7.3. The developer
+  confirmed that every scenario passed and nothing failed, so the README
+  records no new limit. Their figures weren't noted, so this entry holds no
+  measurement. 5.1's pass means it matched native's 446 candidate pairs and
+  131 groups over 3,664 tracks, and 5.2's pass means the long mix's row matched
+  native's. 7.3 was checked as a run held up by its first install, and the
+  exact case of a run queued behind another call stays with H1. Phase 0 has
+  V3 and V8 left.
 - **2026-11-24 · SET1–SET16, D5, D6** · Added, from the developer's idea:
   setcraft, a part of the page that composes, checks and documents DJ sets
   from a library, and exports them. It never mixes, analyses audio or changes
