@@ -1448,7 +1448,9 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 - **2026-11-26 · plan** · W24 added at the developer's request: an option in
   `playlist-diff`, a checkbox on the page, that also lists the folder's tracks
-  that aren't in the playlist, in `extra_<playlist>.csv` and a fifth tab.
+  that aren't in the playlist, in `extra_<playlist>.csv` and a fifth tab. Its
+  issue is [#58](https://github.com/eigenomarksamy/selecta/issues/58), `ready`,
+  P2, `feature` and `s`.
 - **2026-11-26 · plan** · Renamed, since the ecosystem's lanes are numbered
   across its repositories: C4 from `C1`, C5 from `C2`, DOC2 from `DOC1`, G9 from
   `G1`, G10 from `G2`, G11 from `G3`, G12 from `G4`, G13 from `G5`, H5 from
