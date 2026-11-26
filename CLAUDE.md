@@ -81,7 +81,8 @@ debt, a regression harness and a persistent state root, then the five planned
 features, as tickets in lanes (V, F, H, S, L, G, R, X, C, W, SET, DOC, SCM),
 with the decisions already made (D1–D6). Each ticket has a stable anchor, its id in
 lowercase, and exactly one GitHub issue titled `<id>: <title>` whose body links
-that anchor. An id is never reused or renumbered.
+that anchor. An id is never reused or renumbered, and the lanes are numbered
+across the ecosystem, so a lane can skip numbers.
 
 When work ships: the ticket's heading ends in *done*, it gets a *Result* with
 what was measured, the plan's log gets a dated line, *Where selecta stands* is
@@ -111,7 +112,7 @@ extend. What the existing structure already decides for them:
   local inputs; it needs credentials (environment variables, never committed,
   degrading to the sources that have keys rather than failing); and it needs a
   *persistent* cache, which neither `out/` (reports) nor `tmp/` (deleted on
-  exit) is. That is the state root, S1, whose location D1 decided.
+  exit) is. That is the state root, S5, whose location D1 decided.
   `core/spotify.py` is the Spotify adapter it would start from. Each source is
   an adapter behind one interface, because most of the interesting ones are
   gated or closed; re-verify the README's source table before building (G0).
@@ -394,7 +395,7 @@ those flags can be typed after the subcommand: pass it straight through to
   The redirect URI defaults to `http://127.0.0.1:8765/callback`
   (`SELECTA_SPOTIFY_REDIRECT_URI` overrides; without a port, a free one is
   picked). Spotify rejects `localhost` by name. **The token is not saved**: that
-  waits for the state root (plan, S1). The browser build's page keeps its own
+  waits for the state root (plan, S5). The browser build's page keeps its own
   login in localStorage; that is the page's, not this module's.
   **Two hooks exist for the browser build and nothing else:** `supplied_token`
   (set, `login` returns it instead of logging in) and `transport` (how
@@ -682,7 +683,7 @@ Spotify is reported here with the CSV advice, not as a failure.
   normalizers: neither handles Spotify's `Title - Remix` convention or accents,
   and a third strictness there would muddy the documented two. **When
   enrichment or `dig` needs "is this owned", this module moves to `core` (rule
-  1, plan G1); it is not imported across.** `match` takes a `vet` and tries
+  1, plan G9); it is not imported across.** `match` takes a `vet` and tries
   **every** file that matches by name, the first passing one winning in each
   tier, so a mix saved under a track's name cannot hide the real file beside it.
   Only when all fail is the answer the fourth outcome, `mismatch`, naming the

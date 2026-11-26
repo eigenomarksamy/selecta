@@ -165,7 +165,7 @@ something else, and Python must drop it without starting it.
   behind *another call*. That case and this one stop the run at the same point,
   the first lines of `run` in `frontend/src/browser/worker.ts`. But the only
   calls a run can queue behind finish in well under a second, so no hand can
-  time it. A scripted check, which [H1](plan.md#h1)'s browser tier could hold,
+  time it. A scripted check, which [H5](plan.md#h5)'s browser tier could hold,
   is the way to cover that exact case.
 
 ## Native baselines

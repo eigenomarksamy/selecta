@@ -61,8 +61,8 @@ work found.
 
 **Priority.** The dependency diagram puts the phases in three columns, which
 map onto the Project's priorities: Phases 0 and 1 (*now*) are P1, Phases 2 and
-3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W1–W4, C1, DOC1
-and SCM1 are P2, and C2 is P3. SET1–SET6 and SET12, setcraft's first version,
+3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W15–W18, C4, DOC2
+and SCM2 are P2, and C5 is P3. SET1–SET6 and SET12, setcraft's first version,
 are P2, and the rest of the SET lane is P3. A priority set in the Project
 overrides this.
 
@@ -87,8 +87,8 @@ still open in each command:
 | `rekordbox` | partial | Artists are blank on a run from the local database alone. A USB's `export.pdb` is read since [F6](#f6), in the browser build too since [F9](#f9); its `exportLibrary.db` is not read | None: attaching the USB fills the artists (CLAUDE.md) |
 | `analyze` | done | Cue points and waveforms are skipped on purpose | — |
 | `quality` | done | Nothing. A USB alone gets its Rekordbox claims from its `export.pdb` since [F6](#f6), in the browser build too since [F9](#f9) | — |
-| `playlist-diff` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
-| `playlist-export` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S1](#s1). The second is Spotify's rule |
+| `playlist-diff` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S5](#s5). The second is Spotify's rule |
+| `playlist-export` | done | No saved login in the CLI or `selecta web`. Spotify only serves playlists you own or collaborate on | [S5](#s5). The second is Spotify's rule |
 
 Of the front ends, `selecta web` is done. Its one planned item, a timeline view
 of `analyze`'s phrases, is deferred ([Phase 1](#deferred-on-purpose)). The
@@ -111,7 +111,7 @@ exception is a task to redesign.
 - **Features import `selecta.core`, never a sibling.** When two features need
   the same code, it moves to `core` first. `playlist_diff/matching.py` is the
   next candidate, once enrichment or `dig` needs "is this the same track"
-  ([G1](#g1)).
+  ([G9](#g9)).
 - **`add_parser` is argparse only.** A new dependency becomes an extra, imported
   inside the handler, and `selecta --help` keeps working without it.
 - **Read-only commands stay read-only.** Each writer gets its own command. It
@@ -244,7 +244,7 @@ ticket in this phase needs another.
   pass, but the browser version and which signatures 7.2's three hand runs
   gave weren't noted. As planned, 7.3 covered a run held up by its first
   install. The exact case of a run queued behind another call is left to a
-  scripted check, which [H1](#h1)'s browser tier could hold ([log](#log)).
+  scripted check, which [H5](#h5)'s browser tier could hold ([log](#log)).
 
 <a id="v8"></a>
 ### V8 · Encoding leftovers · *done*
@@ -313,7 +313,7 @@ Each ticket's check is its *done when*.
 - **Change:** a Python reader for the DeviceSQL tables `quality` and
   `rekordbox` need. Check it against rbxport's `rbl-pdb`, built at a pinned
   commit outside this tree. That build is the oracle Phase 4 extends
-  ([L1](#l1)).
+  ([L11](#l11)).
 - **Done when:** its rows equal `rbl-pdb`'s on the reference USB, and a run of
   `quality` on the USB alone, with no local library behind it, fills the `rb_`
   columns. Today that run matches 0 rows, against 3,069 of 3,664 with the local
@@ -415,8 +415,8 @@ wrong report. In the writers of Phases 4 and 7, it produces lost data.
 
 This phase needs Phase 1: the baselines are taken after its fixes.
 
-<a id="h1"></a>
-### H1 · The regression harness · l
+<a id="h5"></a>
+### H5 · The regression harness · l
 
 **What it is.** The script runs each command on the reference clone into a
 scratch `--out-dir`. It compares the counts and the SHA-256 of every report that
@@ -453,8 +453,8 @@ state, because `out/` holds reports and `tmp/` is deleted on exit.
 This phase needs the real Spotify login checked first ([V1](#v1)), done on
 2026-11-19.
 
-<a id="s1"></a>
-### S1 · The state root, with the saved Spotify login · m
+<a id="s5"></a>
+### S5 · The state root, with the saved Spotify login · m
 
 **Proposal.** A `state` root, set the way the other two are: `--state-dir`, then
 `SELECTA_STATE_DIR`, then a default. The default is per-user,
@@ -488,12 +488,12 @@ library, with its own backup and undo, so a writer of selecta's own is worth
 building only if handing off fails. This keeps every selecta command read-only
 for as long as possible.
 
-The tickets that import into Rekordbox or write need [H1](#h1), whose writer
-fixtures they use: L2 and L4, and L5 through them. L1 and L3 touch no library,
-so for them H1 is an *after*.
+The tickets that import into Rekordbox or write need [H5](#h5), whose writer
+fixtures they use: L12 and L14, and L5 through them. L11 and L13 touch no library,
+so for them H5 is an *after*.
 
-<a id="l1"></a>
-### L1 · Extend the oracle from Phase 1 · s
+<a id="l11"></a>
+### L11 · Extend the oracle from Phase 1 · s
 
 - **Change:** add `rbl-onelibrary` and `rbl-anlz` at the same pinned commit as
   `rbl-pdb` ([F6](#f6)). Diff their output on the reference USB against
@@ -501,19 +501,19 @@ so for them H1 is an *after*.
 - **Done when:** both build at `rbl-pdb`'s pinned commit, and their output on
   the reference USB is diffed against `core/anlz.py`'s, with every difference
   recorded in the [log](#log).
-- **Needs:** [F6](#f6). **After:** H1.
+- **Needs:** [F6](#f6). **After:** H5.
 
-<a id="l2"></a>
-### L2 · Find out what rbxport and Rekordbox import · m
+<a id="l12"></a>
+### L12 · Find out what rbxport and Rekordbox import · m
 
 - **Change:** Rekordbox XML is the likely format, and `rbl-db` has a module for
   it. Record which playlist fields survive the import: order, nesting and names.
 - **Done when:** this plan records the format, and whether order, nesting and
   names each survive an import into Rekordbox and into rbxport.
-- **Needs:** [H1](#h1). **After:** L1.
+- **Needs:** [H5](#h5). **After:** L11.
 
-<a id="l3"></a>
-### L3 · Produce playlists from reports · m
+<a id="l13"></a>
+### L13 · Produce playlists from reports · m
 
 - **Change:** a new feature (name to be decided) turns existing reports into
   importable playlists, written to `out/`:
@@ -521,40 +521,40 @@ so for them H1 is an *after*.
   - the owned tracks from `playlist-diff`,
   - the tracks `quality` flagged, by issue kind.
 - **Done when:** the feature writes all three kinds of playlist to `out/` in
-  the format L2 found, from existing reports, and reads nothing else.
-- **Needs:** [L2](#l2), which needs H1.
+  the format L12 found, from existing reports, and reads nothing else.
+- **Needs:** [L12](#l12), which needs H5.
 
-<a id="l4"></a>
-### L4 · Import them into Rekordbox for real · s
+<a id="l14"></a>
+### L14 · Import them into Rekordbox for real · s
 
-- **Change:** check against a scratch copy of `master.db` from H1's fixtures,
+- **Change:** check against a scratch copy of `master.db` from H5's fixtures,
   never the live library. Diff the database before and after with
   `rbl-difftool`.
-- **Done when:** L3's playlists are imported into a scratch copy of `master.db`
-  from H1's fixtures, and `rbl-difftool`'s diff of that copy, before and after,
+- **Done when:** L13's playlists are imported into a scratch copy of `master.db`
+  from H5's fixtures, and `rbl-difftool`'s diff of that copy, before and after,
   is recorded in the [log](#log).
-- **Needs:** [L3](#l3), [H1](#h1).
+- **Needs:** [L13](#l13), [H5](#h5).
 
 <a id="l5"></a>
 ### L5 · Decide on direct writes · tbd
 
-- **Change:** build a writer to `master.db` only if L2–L4 show that importing
+- **Change:** build a writer to `master.db` only if L12–L14 show that importing
   cannot do the job. If one is built, it is its own command. It backs up
   `master.db` first, refuses to run while Rekordbox has the file open, and reads
   through `core/rekordbox_db.py`. Tag edits and moving analysis data in or out
   follow the same rules, and rbxport covers most of what they would do.
 - **Done when:** whether a writer is built is recorded in D2's row. If one is
-  built, its tests pass on H1's writer fixtures and never touch the original.
-- **Needs:** [L2](#l2), [L3](#l3), [L4](#l4). [D2](#open-decisions) is decided:
+  built, its tests pass on H5's writer fixtures and never touch the original.
+- **Needs:** [L12](#l12), [L13](#l13), [L14](#l14). [D2](#open-decisions) is decided:
   hand off first.
 
 ## Phases 5 and 6 — Genre enrichment, then `dig`
 
 Build enrichment first, as a read-only report. `dig` cannot score a result as a
 percentile within its genre until the genres of the owned tracks are known. Both
-phases need the cache from Phase 3 ([S1](#s1)). Both also need the same shared
-code in `core`: source adapters ([G2](#g2)) and the same-track matcher
-([G1](#g1)).
+phases need the cache from Phase 3 ([S5](#s5)). Both also need the same shared
+code in `core`: source adapters ([G10](#g10)) and the same-track matcher
+([G9](#g9)).
 
 <a id="g0"></a>
 ### G0 · Before either phase: re-verify the source table · s
@@ -568,105 +568,105 @@ code in `core`: source adapters ([G2](#g2)) and the same-track matcher
 
 ### Phase 5 — Genre enrichment
 
-The tickets that call a source need [S1](#s1)'s cache and [G0](#g0)'s source
-table: G3, and G4 through it. G2 needs G0, which says which sources need keys,
-and S1 is an *after* for it. G1 moves code and calls no source, so for it both
+The tickets that call a source need [S5](#s5)'s cache and [G0](#g0)'s source
+table: G11, and G12 through it. G10 needs G0, which says which sources need keys,
+and S5 is an *after* for it. G9 moves code and calls no source, so for it both
 are an *after*.
 
-<a id="g1"></a>
-#### G1 · Move the matcher · xs
+<a id="g9"></a>
+#### G9 · Move the matcher · xs
 
 - **Change:** `playlist_diff/matching.py` moves to `core`, as rule 1 requires.
 - **Done when:** `playlist-diff`'s output stays byte-identical on the 3,628-row
   self-playlist.
-- **Needs:** nothing. **After:** S1, G0.
+- **Needs:** nothing. **After:** S5, G0.
 
-<a id="g2"></a>
-#### G2 · One adapter interface in `core` · s
+<a id="g10"></a>
+#### G10 · One adapter interface in `core` · s
 
 - **Change:** each source reads its key from an environment variable, and the
   command falls back to whichever sources have keys.
 - **Done when:** the interface is in `core`, and a command with no keys set runs
   on the sources that need none instead of failing.
-- **Needs:** [G0](#g0). **After:** G1, S1.
+- **Needs:** [G0](#g0). **After:** G9, S5.
 
-<a id="g3"></a>
-#### G3 · Add the sources in order · l
+<a id="g11"></a>
+#### G11 · Add the sources in order · l
 
 - **Change:** MusicBrainz first, for IDs (no key, 1 request per second, a
   User-Agent header required). Then Discogs styles (a token, about 60 requests
   per minute). Then Last.fm tags (an API key).
-- **Done when:** each source is an adapter behind G2's interface, keeps to its
+- **Done when:** each source is an adapter behind G10's interface, keeps to its
   rate limit, and fails on its own without breaking the command.
-- **Needs:** [G2](#g2), [S1](#s1), [G0](#g0).
+- **Needs:** [G10](#g10), [S5](#s5), [G0](#g0).
 
-<a id="g4"></a>
-#### G4 · The report · s
+<a id="g12"></a>
+#### G12 · The report · s
 
 - **Change:** one CSV row per track: path, MusicBrainz IDs, Discogs styles,
   Last.fm tags, and which source and match gave each value.
 - **Done when:** the report is written for the reference clone with those
   columns, and the command writes nothing else.
-- **Needs:** [G1](#g1), [G3](#g3).
+- **Needs:** [G9](#g9), [G11](#g11).
 
-<a id="g5"></a>
-#### G5 · Writing tags back · tbd · parked
+<a id="g13"></a>
+#### G13 · Writing tags back · tbd · parked
 
 - **Change:** comes later, as a separate writer command, and only on request.
-- **Done when:** the writer is its own command, and its tests pass on H1's
+- **Done when:** the writer is its own command, and its tests pass on H5's
   fixtures without touching an original file.
-- **Needs:** [G4](#g4), [H1](#h1), and your request. Parked until then.
+- **Needs:** [G12](#g12), [H5](#h5), and your request. Parked until then.
 
 ### Phase 6 — `dig`
 
-Only the score, [R4](#r4), needs [G4](#g4), the genres of the owned tracks.
-The others need Phase 5's shared code instead: [R1](#r1) needs the matcher
-([G1](#g1)) and the Discogs adapter ([G3](#g3)), which brings the cache
-([S1](#s1)) and [G0](#g0) with it, and the rest need R1. Enrichment still
+Only the score, [R14](#r14), needs [G12](#g12), the genres of the owned tracks.
+The others need Phase 5's shared code instead: [R11](#r11) needs the matcher
+([G9](#g9)) and the Discogs adapter ([G11](#g11)), which brings the cache
+([S5](#s5)) and [G0](#g0) with it, and the rest need R11. Enrichment still
 comes first, as an *after*.
 
-<a id="r1"></a>
-#### R1 · Discogs and the local cross-reference first · l
+<a id="r11"></a>
+#### R11 · Discogs and the local cross-reference first · l
 
 - **Change:** seeded by label: "what am I missing from this label". This needs
   one free token, and it is the half no website can do.
 - **Done when:** `dig`, seeded by a label, lists that label's releases that the
   library does not own.
-- **Needs:** [G1](#g1), [G3](#g3). **After:** G4.
+- **Needs:** [G9](#g9), [G11](#g11). **After:** G12.
 
-<a id="r2"></a>
-#### R2 · Exclusions · s
+<a id="r12"></a>
+#### R12 · Exclusions · s
 
 - **Change:** exclude anything already owned (by name, and by fingerprint where
   one exists) and anything rejected before. A file of rejections goes under the
   state root.
 - **Done when:** owned and rejected records never appear in `dig`'s results, and
   the rejections persist between runs under the state root.
-- **Needs:** [R1](#r1), [S1](#s1).
+- **Needs:** [R11](#r11), [S5](#s5).
 
-<a id="r3"></a>
-#### R3 · Every result carries why it was returned · s
+<a id="r13"></a>
+#### R13 · Every result carries why it was returned · s
 
 - **Change:** each result shows the hops from its seed.
 - **Done when:** every row of `dig`'s report lists the hops from its seed.
-- **Needs:** [R1](#r1).
+- **Needs:** [R11](#r11).
 
-<a id="r4"></a>
-#### R4 · The underground score · tbd
+<a id="r14"></a>
+#### R14 · The underground score · tbd
 
 - **Change:** comes last. It is a composite percentile within the seed's genre,
   with each input shown in the report.
 - **Done when:** every result carries the score and each input to it.
-- **Needs:** [G4](#g4). **After:** R1–R3.
+- **Needs:** [G12](#g12). **After:** R11–R13.
 
-<a id="r5"></a>
-#### R5 · `dig` in the browser build · tbd · parked
+<a id="r15"></a>
+#### R15 · `dig` in the browser build · tbd · parked
 
 - **Change:** not at first. `dig` would add at least three origins to
   `connect-src`, and whether those APIs allow CORS is unchecked.
 - **Done when:** each source `dig` uses in a tab is checked for CORS, and the
   origins it adds are recorded in this plan as the CSP rule asks.
-- **Needs:** [R1](#r1), the `dig` it would run in a tab. **After:** R2–R4.
+- **Needs:** [R11](#r11), the `dig` it would run in a tab. **After:** R12–R14.
   [D4](#open-decisions) is decided: later, so it stays parked until then.
 
 ## Phase 7 — Serato and Traktor export
@@ -683,19 +683,19 @@ format.
   carry over. Phrase structure never does.
 - **Inputs:** selecta's readers (`core/anlz.py` for beat grids, the database
   for BPM and key). The library manager's playlists, if Phase 4 has built them
-  by then ([L3](#l3)). That is an input, not a need.
+  by then ([L13](#l13)). That is an input, not a need.
 - **Check:** load the result in Traktor and in Serato. A file that parses
   correctly does not prove a player accepts it, as rbxport's own README warns.
 
-Every ticket in this phase needs [H1](#h1).
+Every ticket in this phase needs [H5](#h5).
 
-<a id="x1"></a>
-### X1 · Export to Traktor · l
+<a id="x11"></a>
+### X11 · Export to Traktor · l
 
 - **Change:** the export above, writing `collection.nml` to the destination.
 - **Done when:** the result loads in Traktor, and the run's report lists what
   did not carry over.
-- **Needs:** [H1](#h1).
+- **Needs:** [H5](#h5).
 
 <a id="x2"></a>
 ### X2 · Export to Serato · xl
@@ -705,16 +705,16 @@ Every ticket in this phase needs [H1](#h1).
   copy's audio stream is byte-identical apart from the tags.
 - **Done when:** the result loads in Serato, the regression check passes, and
   the originals are unchanged.
-- **Needs:** [H1](#h1). **After:** X1.
+- **Needs:** [H5](#h5). **After:** X11.
 
 ## Outside the phases
 
-These need none of the phases, so any of them can land at any time: W1–W4,
+These need none of the phases, so any of them can land at any time: W15–W18,
 small changes to the page, the C lane, a new command that makes MP3s from
 lossless files, and the SET lane, setcraft.
 
-<a id="w1"></a>
-### W1 · A button back to eigenomar.com · xs
+<a id="w15"></a>
+### W15 · A button back to eigenomar.com · xs
 
 - **Change:** selecta has no footer, so the button goes at the foot of the
   sidebar, in the browser branch of `.sidebar-foot` in `frontend/src/App.tsx`.
@@ -726,8 +726,8 @@ lossless files, and the SET lane, setcraft.
   and opens eigenomar.com in a new tab while jobs and reports stay in place.
 - **Needs:** nothing.
 
-<a id="w2"></a>
-### W2 · Explain the quality report's issues on the page · s
+<a id="w16"></a>
+### W16 · Explain the quality report's issues on the page · s
 
 - **Change:** the quality view, `frontend/src/views/QualityView.tsx`, names
   each issue by its kind, such as `transcode?` or `rekordbox bitrate`, in the
@@ -762,8 +762,8 @@ lossless files, and the SET lane, setcraft.
   and the browser CSP is unchanged.
 - **Needs:** nothing.
 
-<a id="w3"></a>
-### W3 · Copy a playlist export as a list of tracks · s
+<a id="w17"></a>
+### W17 · Copy a playlist export as a list of tracks · s
 
 - **Change:** a `playlist-export` CSV opens in the page's generic table view
   today (`viewFor` in `frontend/src/pages/ReportPage.tsx`), with no way to
@@ -787,8 +787,8 @@ lossless files, and the SET lane, setcraft.
   unchanged.
 - **Needs:** nothing.
 
-<a id="w4"></a>
-### W4 · The ecosystem's tab icon · xs
+<a id="w18"></a>
+### W18 · The ecosystem's tab icon · xs
 
 - **Change:** every app under eigenomar.com shows the same tab icon:
   eigenomar.com's lambda with its two colors swapped, a light-blue tile and
@@ -807,13 +807,13 @@ lossless files, and the SET lane, setcraft.
 into a second folder that mirrors the first. It is a writer, so it is a
 command of its own, but it writes no library data and never opens a source
 file for writing: *nothing in selecta modifies an audio file* stays true. That
-is why it needs neither the harness ([H1](#h1)) nor a backup, which guard
+is why it needs neither the harness ([H5](#h5)) nor a backup, which guard
 the writers that change `master.db`. Only lossless sources are read. A lossy
 file converted again is the transcode `quality` exists to catch, so MP3, AAC,
 OGG and Opus inputs are never offered.
 
-<a id="c1"></a>
-### C1 · `selecta convert`: FLAC to 320 kbps MP3 · m
+<a id="c4"></a>
+### C4 · `selecta convert`: FLAC to 320 kbps MP3 · m
 
 - **Change:** a new feature, `features/convert/`, registered in `cli.FEATURES`:
   `selecta convert <directory> <destination>`. It takes the `.flac` files
@@ -868,20 +868,20 @@ OGG and Opus inputs are never offered.
   installed, and the README and `CLAUDE.md` say what it does.
 - **Needs:** nothing.
 
-<a id="c2"></a>
-### C2 · `convert` reads WAV, AIFF and ALAC · s
+<a id="c5"></a>
+### C5 · `convert` reads WAV, AIFF and ALAC · s
 
 - **Change:** the rest of the lossless formats `AUDIO_EXTS` holds, `.wav`,
-  `.aiff`/`.aif` and ALAC in `.m4a`, go through C1's encoder. An `.m4a` is
+  `.aiff`/`.aif` and ALAC in `.m4a`, go through C4's encoder. An `.m4a` is
   converted only when ffprobe says its codec is ALAC, since AAC shares the
   extension, and an AAC is counted as lossy and left alone. AIFF's and
   ALAC's tags are kept as FLAC's are. A WAV usually has none, so its MP3
   gets a title from the filename only when the WAV has no title of its own,
   and the report says which files it did that for.
 - **Done when:** a measured run on the reference clone's WAV, AIFF and M4A
-  files meets C1's checks for each format it converts, and its report counts
+  files meets C4's checks for each format it converts, and its report counts
   each AAC as skipped, lossy.
-- **Needs:** [C1](#c1).
+- **Needs:** [C4](#c4).
 
 ### The SET lane: setcraft
 
@@ -1169,7 +1169,7 @@ and archives of sets, and public share links are not planned at all.
   library's text as written. None writes to the library. Empty slots are left
   out, unless the user asks for placeholders in the text or HTML export.
   - **Plain text:** one line per track, *Artist - Title* or *Title - Artist*,
-    numbered or not, copied or downloaded. It uses [W3](#w3)'s formatter,
+    numbered or not, copied or downloaded. It uses [W17](#w17)'s formatter,
     moved to where both can use it.
   - **`.m3u8`:** UTF-8 and `#EXTM3U`, then for each track
     `#EXTINF:<seconds>,<artist> - <title>` and the file's absolute path.
@@ -1185,7 +1185,7 @@ and archives of sets, and public share links are not planned at all.
   both orders, numbered and not, with accents and with a title that holds a
   spaced hyphen. The HTML opens offline and shows the artwork. The browser CSP
   is unchanged.
-- **Needs:** [SET6](#set6). After [W3](#w3).
+- **Needs:** [SET6](#set6). After [W17](#w17).
 
 <a id="set13"></a>
 ### SET13 · Import sets from text, `.m3u8` and Rekordbox playlists · m
@@ -1253,12 +1253,12 @@ and archives of sets, and public share links are not planned at all.
 
 The ecosystem's contract, in `meta-eigenomar`, is adding two standards that
 every repository adopts: the documents each one keeps, and how each one
-manages its source and delivers it. DOC1 and SCM1 adopt them here, each once
+manages its source and delivers it. DOC2 and SCM2 adopt them here, each once
 its standard is designed, and until then their issues stay in the backlog.
-Like W1, they are outside both tracks.
+Like W15, they are outside both tracks.
 
-<a id="doc1"></a>
-### DOC1 · The product's documents · tbd
+<a id="doc2"></a>
+### DOC2 · The product's documents · tbd
 
 - **Change:** write or gather selecta's product vision, architecture, design,
   testing strategy, and verification and validation (V&V) documents, in the
@@ -1268,7 +1268,7 @@ Like W1, they are outside both tracks.
   rules and its layout, and `docs/rekordbox.md` and `docs/analyze.md` the two
   formats it reads. [Rules every phase keeps](#rules-every-phase-keeps) and
   this plan's opening are the nearest thing to a vision. Phase 0's checks and
-  [H1](#h1)'s harness are the verification and the testing strategy as they
+  [H5](#h5)'s harness are the verification and the testing strategy as they
   are planned, so the documents name them rather than restate them.
 - **Done when:** each of the five documents exists, or names the file or
   section that holds it, and follows the standard's outline. `project.yaml`
@@ -1276,14 +1276,14 @@ Like W1, they are outside both tracks.
   Nothing in them is confidential, since this repository is public.
 - **Needs:** the ecosystem's document standard (`meta-eigenomar` ST1).
 
-<a id="scm1"></a>
-### SCM1 · The ecosystem's SCM strategy · tbd
+<a id="scm2"></a>
+### SCM2 · The ecosystem's SCM strategy · tbd
 
 - **Change:** adopt the ecosystem's SCM strategy through its adoption
   checklist: CI, branching, protection of `main`, versioning and releases, the
   health report and dependency updates. Today selecta has no CI, and this plan
   accepts the gap ([Linux and other portability notes](#linux-and-other-portability-notes)):
-  CI could install and build, but [H1](#h1) needs the reference library, which
+  CI could install and build, but [H5](#h5) needs the reference library, which
   CI cannot have. Cloudflare's build deploys every push to `main`, there are
   no releases, and the audio tools are built on Linux or WSL and committed with
   their `stamp.json`.
@@ -1303,16 +1303,16 @@ foundations are drawn thicker.
 flowchart LR
   subgraph writers["the writers"]
     direction LR
-    P1["Phase 1 · known debt<br/>F5–F7"] -->|"baselines after fixes"| P2["Phase 2 · harness<br/>H1"]
-    P2 -->|"fixtures for writers"| P4["Phase 4 · library manager<br/>L1–L5"]
-    P2 --> P7["Phase 7 · Traktor, Serato<br/>X1, X2"]
+    P1["Phase 1 · known debt<br/>F5–F7"] -->|"baselines after fixes"| P2["Phase 2 · harness<br/>H5"]
+    P2 -->|"fixtures for writers"| P4["Phase 4 · library manager<br/>L11–L14 and L5"]
+    P2 --> P7["Phase 7 · Traktor, Serato<br/>X11, X2"]
     P4 -.->|"playlists, if built"| P7
   end
   subgraph network["the network features"]
     direction LR
-    P0["Phase 0 · verify<br/>V1, V3–V9"] -->|"V1: real login checked"| P3["Phase 3 · state root<br/>S1"]
-    P3 -->|"cache"| P5["Phase 5 · genre enrichment<br/>G0–G5"]
-    P5 -->|"genres for scoring"| P6["Phase 6 · dig<br/>R1–R5"]
+    P0["Phase 0 · verify<br/>V1, V3–V9"] -->|"V1: real login checked"| P3["Phase 3 · state root<br/>S5"]
+    P3 -->|"cache"| P5["Phase 5 · genre enrichment<br/>G0 and G9–G13"]
+    P5 -->|"genres for scoring"| P6["Phase 6 · dig<br/>R11–R15"]
   end
   classDef foundation stroke-width:3px
   class P2,P3 foundation
@@ -1321,8 +1321,8 @@ flowchart LR
 The top row leads to the writers and the bottom row to the network features.
 The two tracks are independent, so they can be worked in parallel, and there is
 no arrow between them. No phase has a date yet. The gates in the decisions
-table below sit inside the phases, not between the boxes. W1–W4, C1, C2, the
-SET lane, DOC1 and SCM1 are outside both tracks. An arrow is a hard need only for the tickets of its phase
+table below sit inside the phases, not between the boxes. W15–W18, C4, C5, the
+SET lane, DOC2 and SCM2 are outside both tracks. An arrow is a hard need only for the tickets of its phase
 that use what it carries ([How this plan works](#how-this-plan-works)).
 
 ## Open decisions
@@ -1333,10 +1333,10 @@ D1–D4 were made on 2026-11-13 and D5–D6 on 2026-11-24, so none is open today
 
 | Id | Decision | Options | Recommendation | Blocks | Outcome |
 | --- | --- | --- | --- | --- | --- |
-| D1 | Where persistent state lives | The per-user folder, or `./state` in the project | The per-user folder, which `SELECTA_STATE_DIR` can override | [S1](#s1), and through it Phases 5 and 6 | The per-user folder, 2026-11-13: `%LOCALAPPDATA%\selecta` on Windows, `$XDG_STATE_HOME/selecta` (by default `~/.local/state/selecta`) on Linux, and `--state-dir` or `SELECTA_STATE_DIR` over either |
+| D1 | Where persistent state lives | The per-user folder, or `./state` in the project | The per-user folder, which `SELECTA_STATE_DIR` can override | [S5](#s5), and through it Phases 5 and 6 | The per-user folder, 2026-11-13: `%LOCALAPPDATA%\selecta` on Windows, `$XDG_STATE_HOME/selecta` (by default `~/.local/state/selecta`) on Linux, and `--state-dir` or `SELECTA_STATE_DIR` over either |
 | D2 | Who writes playlists | selecta writes `master.db` itself, or hands off through Rekordbox XML or rbxport | Hand off first | [L5](#l5) | Hand off first, 2026-11-13. L5 records whether a writer of selecta's own is needed |
 | D3 | `catalog`'s exit code for a failed audit | Any non-zero code | One that is not 2, since `--missing-metadata` already uses 2 for a path that is not a directory | F2, done | 1, 2026-11-13 |
-| D4 | `dig` in the browser build | Never, or later | Later, and only once the sources are known to allow CORS | [R5](#r5) | Later, 2026-11-13. R5 stays parked until `dig` exists and its sources are checked for CORS |
+| D4 | `dig` in the browser build | Never, or later | Later, and only once the sources are known to allow CORS | [R15](#r15) | Later, 2026-11-13. R15 stays parked until `dig` exists and its sources are checked for CORS |
 | D5 | Where setcraft's logic lives | The page, in TypeScript, in both builds; or a Python feature run through Pyodide | The page: every edit would otherwise go through the worker, which handles one message at a time and is busy while a command runs | [SET1](#set1), and the lane through it | The page, 2026-11-24: `frontend/src/setcraft/`, in `selecta web` and the browser build alike. Python only reads the libraries the page cannot ([SET3](#set3), [SET4](#set4)) |
 | D6 | What a reload keeps | Nothing; the tab's sessionStorage; or settings alone in localStorage | The tab's sessionStorage | [SET5](#set5) | The tab's sessionStorage, 2026-11-24: a reload or a crash keeps the session, closing the tab ends it, and what must outlive the tab is exported |
 
@@ -1344,10 +1344,10 @@ D1–D4 were made on 2026-11-13 and D5–D6 on 2026-11-24, so none is open today
 
 - **The third-party APIs change.** Spotify, Discogs and Last.fm have each
   changed their access rules before. Each adapter must fail on its own, without
-  breaking the command ([G3](#g3)).
+  breaking the command ([G11](#g11)).
 - **A bug in a writer loses library data.** Four things guard against it: each
   writer is its own command, it backs up first, it refuses to run while
-  Rekordbox has the file open, and its tests run on fixtures only ([H1](#h1)).
+  Rekordbox has the file open, and its tests run on fixtures only ([H5](#h5)).
 - **A long browser run stalled once, for no known cause.** One whole-library
   `duplicates` run stalled on 2026-10-24, and the three runs since have
   finished ([V6](#v6)).
@@ -1361,7 +1361,7 @@ What the tickets above work within, and what none of them changes on its own:
   browser build with `build_browser.py`, and the audio tools with
   `wasm/build.sh`.
 - **Tests:** none. Changes are verified by measured runs on the reference clone
-  (CLAUDE.md), and by [H1](#h1) once it exists.
+  (CLAUDE.md), and by [H5](#h5) once it exists.
 - **CI:** none (see *Linux* below). **Branching:** work lands on `main`.
   **Releases:** none. The version is in `pyproject.toml`.
 - **Deployment:** Cloudflare's build of this repository deploys
@@ -1380,7 +1380,7 @@ covers `npm ci`, the page's type check and build, and the wheels. The browser
 build runs every command's Python in Pyodide, on POSIX paths. [V8](#v8) adds one
 native POSIX run. Otherwise native commands, and `selecta web`'s jobs and their
 signals, are unchecked on Linux. CI could only install and build here, because
-[H1](#h1) needs the reference library, which CI cannot have.
+[H5](#h5) needs the reference library, which CI cannot have.
 
 **Other notes.**
 
@@ -1394,7 +1394,7 @@ signals, are unchecked on Linux. CI could only install and build here, because
 - **The drive letter's case.** There are no tests to start from `c:\`.
   `selecta web` compares paths through `os.path.normcase`, so the case does not
   matter there. `catalog`'s audit makes its directory absolute first.
-- **[S1](#s1)'s default.** `%LOCALAPPDATA%\selecta` on Windows and
+- **[S5](#s5)'s default.** `%LOCALAPPDATA%\selecta` on Windows and
   `$XDG_STATE_HOME/selecta`, by default `~/.local/state/selecta`, on Linux
   ([D1](#open-decisions)).
 - **Line endings:** every text file is LF, in the index and on checkout
@@ -1402,6 +1402,14 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-26 · plan** · Renamed, since the ecosystem's lanes are numbered
+  across its repositories: C4 from `C1`, C5 from `C2`, DOC2 from `DOC1`, G9 from
+  `G1`, G10 from `G2`, G11 from `G3`, G12 from `G4`, G13 from `G5`, H5 from
+  `H1`, L11 from `L1`, L12 from `L2`, L13 from `L3`, L14 from `L4`, R11 from
+  `R1`, R12 from `R2`, R13 from `R3`, R14 from `R4`, R15 from `R5`, S5 from
+  `S1`, SCM2 from `SCM1`, W15 from `W1`, W16 from `W2`, W17 from `W3`, W18 from
+  `W4`, X11 from `X1`. Their anchors, headings, references and issues changed
+  with them.
 - **2026-11-24 · V3, V9** · V3 done, by a session against
   selecta.eigenomar.com, headless, with Playwright 1.64.1's Firefox 157.0 and
   WebKit 27.2 on Windows. Both are cross-origin isolated, have
@@ -1493,7 +1501,7 @@ signals, are unchecked on Linux. CI could only install and build here, because
   and 18:18, and the machine did not sleep during the run. But at one core,
   the stalled renderer's 1,627 CPU-seconds put the stall near 17:55, before
   the restart, so its cause stays unknown. The driver is not in the tree
-  ([H1](#h1)'s browser tier will commit one).
+  ([H1](#h5)'s browser tier will commit one).
 - **2026-11-20 · W3, W4, C1, C2** · Added, from the developer's ideas. W3
   copies a `playlist-export` report as a list of `artist - track` lines, on
   the page only. W4 takes the ecosystem's tab icon (shared decision SD5),
@@ -1515,7 +1523,7 @@ signals, are unchecked on Linux. CI could only install and build here, because
   issue is identical, and only `clipped_samples` moves, by 1–4 in 11 rows,
   the MP3 decoding difference already recorded for the browser build. Zero
   console errors. The driver is not in the tree, as for the earlier checks
-  ([H1](#h1)'s browser tier will commit one).
+  ([H1](#h5)'s browser tier will commit one).
 - **2026-11-20 · F8** · Done. The `rekordbox` and `analyze` extras are
   bounded `pyrekordbox>=0.4.0,<0.5`, the same line as the browser build's 0.4.4
   pin. A fresh venv's `pip install -e ".[all]"` installs pyrekordbox 0.4.4 and
