@@ -61,8 +61,8 @@ work found.
 
 **Priority.** The dependency diagram puts the phases in three columns, which
 map onto the Project's priorities: Phases 0 and 1 (*now*) are P1, Phases 2 and
-3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W15–W18, W24, C4, DOC2
-and SCM2 are P2, and C5 is P3. SET1–SET6 and SET12, setcraft's first version,
+3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W15–W18, W24, C4, DOC2,
+SCM2 and MIG2 are P2, and C5 is P3. SET1–SET6 and SET12, setcraft's first version,
 are P2, and the rest of the SET lane is P3. A priority set in the Project
 overrides this.
 
@@ -1301,6 +1301,10 @@ manages its source and delivers it. DOC2 and SCM2 adopt them here, each once
 its standard is designed, and until then their issues stay in the backlog.
 Like W15, they are outside both tracks.
 
+A third standard, `meta-eigenomar` ST3, makes GitHub's issues the home of
+every repository's backlog, and its decisions were made on 2026-11-27. MIG2
+moves this plan's tickets there, once ST3 is built.
+
 <a id="doc2"></a>
 ### DOC2 · The product's documents · tbd
 
@@ -1337,6 +1341,31 @@ Like W15, they are outside both tracks.
   the ecosystem's validator passes.
 - **Needs:** the ecosystem's SCM strategy (`meta-eigenomar` ST2).
 
+<a id="mig2"></a>
+### MIG2 · The backlog moves into GitHub issues · m
+
+- **Change:** move this plan's planning to GitHub all at once, following the
+  cutover steps of the ecosystem's standard `meta-eigenomar` ST3. Each open
+  ticket's content moves into its issue's body, keeping its id and its issue's
+  `<id>: <title>`. Ideas not yet tickets become draft items in the Project with
+  status `idea`, hard needs are blocked-by links, and size, status and
+  priority live only in the Project. A phase becomes a milestone or a parent
+  issue, as ST3 says. Done, dropped and moved tickets stay here as a frozen
+  archive, and each open ticket's anchor stays, linking its issue.
+  [Rules every phase keeps](#rules-every-phase-keeps) and the decisions stay
+  as files, or move into the documents DOC2 writes.
+- **Done when:** every open ticket's content is in its issue, and this file
+  holds only the archive, the anchors and what stays a file. `project.yaml`'s
+  `documents.plan` is `null` and `planning.source` names GitHub, the
+  ecosystem's validator passes, nothing confidential is in any issue, since
+  this repository is public, and the owner approved the cutover. Bringing
+  tickets up to the ecosystem's ticket standard (`meta-eigenomar` ST4) isn't
+  part of it: each ticket follows it when it is picked up.
+- **Needs:** GitHub as the home of the backlog (`meta-eigenomar` ST3), which
+  includes the ecosystem's own cutover first and the backlog's backup. DOC2 is
+  a planning need: the plan's direction moves into the vision before this plan
+  retires.
+
 ## Sequence and dependencies
 
 The harness gates the writers, and the state root gates the network features.
@@ -1366,7 +1395,7 @@ The top row leads to the writers and the bottom row to the network features.
 The two tracks are independent, so they can be worked in parallel, and there is
 no arrow between them. No phase has a date yet. The gates in the decisions
 table below sit inside the phases, not between the boxes. W15–W18, W24, C4, C5, the
-SET lane, DOC2 and SCM2 are outside both tracks. An arrow is a hard need only for the tickets of its phase
+SET lane, DOC2, SCM2 and MIG2 are outside both tracks. An arrow is a hard need only for the tickets of its phase
 that use what it carries ([How this plan works](#how-this-plan-works)).
 
 ## Open decisions
@@ -1446,6 +1475,10 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-27 · plan** · MIG2 added at the owner's request: this
+  repository's cutover to GitHub as the home of its backlog, the ecosystem's
+  standard `meta-eigenomar` ST3, whose decisions were made that day. It needs
+  ST3, so its issue waits as `blocked`.
 - **2026-11-26 · plan** · W24 added at the developer's request: an option in
   `playlist-diff`, a checkbox on the page, that also lists the folder's tracks
   that aren't in the playlist, in `extra_<playlist>.csv` and a fifth tab. Its
