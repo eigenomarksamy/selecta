@@ -61,7 +61,7 @@ work found.
 
 **Priority.** The dependency diagram puts the phases in three columns, which
 map onto the Project's priorities: Phases 0 and 1 (*now*) are P1, Phases 2 and
-3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W15–W18, C4, DOC2
+3 (*foundations*) are P2, and Phases 4–7 (*features*) are P3. W15–W18, W24, C4, DOC2
 and SCM2 are P2, and C5 is P3. SET1–SET6 and SET12, setcraft's first version,
 are P2, and the rest of the SET lane is P3. A priority set in the Project
 overrides this.
@@ -709,7 +709,7 @@ Every ticket in this phase needs [H5](#h5).
 
 ## Outside the phases
 
-These need none of the phases, so any of them can land at any time: W15–W18,
+These need none of the phases, so any of them can land at any time: W15–W18, W24,
 small changes to the page, the C lane, a new command that makes MP3s from
 lossless files, and the SET lane, setcraft.
 
@@ -799,6 +799,50 @@ lossless files, and the SET lane, setcraft.
 - **Done when:** the tab shows the icon on selecta.eigenomar.com and in
   `selecta web`, in a light and a dark browser theme. `npm run build` in
   `frontend/` passes, and the browser CSP is unchanged.
+- **Needs:** nothing.
+
+<a id="w24"></a>
+### W24 · `playlist-diff` both ways: the folder's tracks the playlist lacks · s
+
+- **Change:** `playlist-diff` reports only the playlist's side: the tracks
+  the folder is missing, and the ones it has. Add a flag, `--both-ways`, that
+  also lists the other side: the audio files in the folder that no track of
+  the playlist matched. The page builds its forms from the argparse tree
+  (`web/schema.py`), so the flag is a checkbox, off by default, in
+  `selecta web` and on selecta.eigenomar.com without a change to the form.
+  - **What counts:** every audio file `iter_audio_files` finds that no track
+    matched as `owned`. A file that was the closest candidate of a `maybe` or
+    `mismatch` track is listed with that status and the track's name, so it
+    doesn't read as plainly extra. Every other one is `extra`.
+  - **The report:** `extra_<playlist>.csv` beside the other two, with `#`,
+    `status`, `artist` and `title` from the file's tags, `local_file`,
+    `playlist_track` and `note`. The tags are the ones `LocalIndex` already
+    read, so the flag reads no file a second time. A file's length isn't in
+    it, since `inspect` would then run on every file, and runs only on
+    candidates today.
+  - **The console:** the summary line adds how many files are in the folder
+    and not in the playlist, and those files are printed after the missing
+    tracks, as those are.
+  - **The page:** `PlaylistDiffView.tsx` gets a fifth tab, *not in the
+    playlist*, when the report has an `extra_` file, and `ReportPage.tsx`
+    pairs it with the other two by its name. A report without one shows four
+    tabs, as now.
+  - Without the flag, nothing changes: the same two reports, byte for byte,
+    and the same console output.
+- **Done when:**
+  - without `--both-ways`, `playlist-diff` against the fixture playlist CSVs
+    writes reports byte-identical to `main`'s, as in the quick check.
+  - with it, on the reference clone's 3,664 audio files and a fixture
+    playlist, the files `matched_` names plus the rows of `extra_` come to
+    every audio file in the folder, each once, and a file that is a `maybe`'s
+    closest candidate has that status in `extra_`.
+  - the checkbox shows on the `playlist-diff` form in `selecta web` and on
+    selecta.eigenomar.com, works by keyboard, and its run's report opens with
+    the fifth tab, whose count matches `extra_`'s rows.
+  - `selecta --help` and `selecta playlist-diff --help` work with no extras
+    installed, `npm run build` in `frontend/` and
+    `python build_browser.py --no-install` pass, and the browser CSP is
+    unchanged.
 - **Needs:** nothing.
 
 ### The C lane: `convert`
@@ -1321,7 +1365,7 @@ flowchart LR
 The top row leads to the writers and the bottom row to the network features.
 The two tracks are independent, so they can be worked in parallel, and there is
 no arrow between them. No phase has a date yet. The gates in the decisions
-table below sit inside the phases, not between the boxes. W15–W18, C4, C5, the
+table below sit inside the phases, not between the boxes. W15–W18, W24, C4, C5, the
 SET lane, DOC2 and SCM2 are outside both tracks. An arrow is a hard need only for the tickets of its phase
 that use what it carries ([How this plan works](#how-this-plan-works)).
 
@@ -1402,6 +1446,9 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-26 · plan** · W24 added at the developer's request: an option in
+  `playlist-diff`, a checkbox on the page, that also lists the folder's tracks
+  that aren't in the playlist, in `extra_<playlist>.csv` and a fifth tab.
 - **2026-11-26 · plan** · Renamed, since the ecosystem's lanes are numbered
   across its repositories: C4 from `C1`, C5 from `C2`, DOC2 from `DOC1`, G9 from
   `G1`, G10 from `G2`, G11 from `G3`, G12 from `G4`, G13 from `G5`, H5 from
