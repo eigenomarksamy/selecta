@@ -176,6 +176,13 @@ h2 {
   padding: 0.6rem;
   font-size: 0.78rem;
 }
+/* The button back to eigenomar.com, above the browser build's note. `.sidebar a`
+   would make it a full-width nav row, so it takes back the button's own shape. */
+.sidebar .home-link {
+  display: inline-flex;
+  padding: 0.35rem 0.8rem;
+  margin-bottom: 0.6rem;
+}
 .dot {
   width: 7px;
   height: 7px;
@@ -1009,8 +1016,18 @@ button.play.active {
     padding: 0.5rem;
   }
   .nav-label,
-  .sidebar-foot {
+  .sidebar-foot.muted,
+  .sidebar-foot .muted {
     display: none;
+  }
+  /* On a phone the sidebar is a row, and only the button back to eigenomar.com
+     stays from its foot. */
+  .sidebar-foot {
+    margin: 0 0 0 auto;
+    padding: 0;
+  }
+  .sidebar .home-link {
+    margin-bottom: 0;
   }
   .sidebar .brand {
     margin: 0 0.5rem 0 0;

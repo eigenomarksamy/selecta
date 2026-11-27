@@ -125,8 +125,14 @@ export function App() {
           Spotify setup
         </a>
         {browser ? (
-          <div className="sidebar-foot muted" title="Your files are read in this tab and never leave the browser.">
-            In this tab only · nothing uploaded
+          <div className="sidebar-foot">
+            {/* A new tab, because the jobs and reports live in this one and leaving it would lose them. */}
+            <a className="button home-link" href="https://eigenomar.com" target="_blank" rel="noreferrer">
+              eigenomar.com
+            </a>
+            <div className="muted" title="Your files are read in this tab and never leave the browser.">
+              In this tab only · nothing uploaded
+            </div>
           </div>
         ) : (
           <div className="sidebar-foot muted" title={session.out_root}>

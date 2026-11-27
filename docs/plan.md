@@ -714,7 +714,7 @@ small changes to the page, the C lane, a new command that makes MP3s from
 lossless files, and the SET lane, setcraft.
 
 <a id="w15"></a>
-### W15 · A button back to eigenomar.com · xs
+### W15 · A button back to eigenomar.com · xs · *done*
 
 - **Change:** selecta has no footer, so the button goes at the foot of the
   sidebar, in the browser branch of `.sidebar-foot` in `frontend/src/App.tsx`.
@@ -725,6 +725,16 @@ lossless files, and the SET lane, setcraft.
 - **Done when:** the button shows on selecta.eigenomar.com, works by keyboard,
   and opens eigenomar.com in a new tab while jobs and reports stay in place.
 - **Needs:** nothing.
+- **Result:** the browser branch of `.sidebar-foot` holds the link above its
+  note, with the `.button` styles, `.home-link` giving back the button's shape
+  that `.sidebar a` would take. On a phone the sidebar is a row and its foot was
+  hidden, so there the note stays hidden and the button ends the row. `selecta
+  web`'s foot is unchanged. `npm run build` and `python build_browser.py
+  --no-install` pass. Checked with Playwright's Chromium on `dist/` served with
+  its own `_headers`, at 1280 and 375 px wide, light and dark: the button shows,
+  Tab reaches it, Enter opens eigenomar.com (stubbed) in a new tab, the app's
+  tab stays where it was, and the console has no errors. `_headers` didn't
+  change, so the CSP is the same.
 
 <a id="w16"></a>
 ### W16 · Explain the quality report's issues on the page · s
@@ -1483,6 +1493,9 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-27 · W15** · Done: a button back to eigenomar.com at the foot of
+  the browser build's sidebar, opening a new tab, and at the end of the
+  sidebar's row on a phone. The CSP is unchanged.
 - **2026-11-27 · W18** · Done: the tab icon is the ecosystem's, the lambda on
   a light-blue tile (shared decision SD5), in place of the record. Checked in
   `selecta web` and in the browser build under its CSP, which is unchanged.
