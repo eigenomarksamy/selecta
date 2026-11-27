@@ -788,7 +788,7 @@ lossless files, and the SET lane, setcraft.
 - **Needs:** nothing.
 
 <a id="w18"></a>
-### W18 · The ecosystem's tab icon · xs
+### W18 · The ecosystem's tab icon · xs · *done*
 
 - **Change:** every app under eigenomar.com shows the same tab icon:
   eigenomar.com's lambda with its two colors swapped, a light-blue tile and
@@ -800,6 +800,14 @@ lossless files, and the SET lane, setcraft.
   `selecta web`, in a light and a dark browser theme. `npm run build` in
   `frontend/` passes, and the browser CSP is unchanged.
 - **Needs:** nothing.
+- **Result:** `frontend/public/favicon.svg` is shared decision SD5's icon, byte
+  for byte, and nothing else changed. `npm run build` passes, and both builds
+  carry the same bytes: `src/selecta/web/static/favicon.svg` and, from
+  `python build_browser.py --no-install`, `dist/favicon.svg`. In headless
+  Chrome, `selecta web` and `dist/` served with its own `_headers` each link
+  one `image/svg+xml` icon, which loads under the unchanged CSP. The icon is a
+  filled tile with no `prefers-color-scheme` rule, so it is the same in a light
+  and a dark theme.
 
 <a id="w24"></a>
 ### W24 · `playlist-diff` both ways: the folder's tracks the playlist lacks · s
@@ -1475,6 +1483,9 @@ signals, are unchecked on Linux. CI could only install and build here, because
 
 ## Log
 
+- **2026-11-27 · W18** · Done: the tab icon is the ecosystem's, the lambda on
+  a light-blue tile (shared decision SD5), in place of the record. Checked in
+  `selecta web` and in the browser build under its CSP, which is unchanged.
 - **2026-11-27 · plan** · MIG2 added at the owner's request: this
   repository's cutover to GitHub as the home of its backlog, the ecosystem's
   standard `meta-eigenomar` ST3, whose decisions were made that day. It needs
